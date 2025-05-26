@@ -9,19 +9,12 @@ struct mtk_regulator_priv {
   struct mtk_pmic_regulator regulator;
 };
 
-static int mtk_regulator_probe(struct udevice *dev)
+static int mtk_regulator_of_to_plat(struct udevice *dev)
 {
-  struct udevice *pmic;
-  struct dm_regulator_uclass_plat *uc_pdata;
-  struct mtk_pmic_pdata *pmic_pdata;
-  struct mtk_regulator_priv *priv;
-  
-  uc_pdata = dev_get_uclass_plat(dev);
-  priv = dev_get_priv(dev);
-  
-  pmic = dev_get_parent(dev);
-  pmic_pdata = (void*)dev_get_driver_data(pmic);
-  priv->pwrap = dev_get_parent(pmic);
+  struct mtk_regulator_priv *priv = dev_get_priv(dev);
+  struct dm_regulator_uclass_plat *uc_pdata = dev_get_uclass_plat(dev);
+  struct udevice *pmic = dev_get_parent(dev);
+  struct mtk_pmic_pdata *pmic_pdata = (void*)dev_get_driver_data(pmic);
 
   for (int i = 0; 1; i++) {
     // end of list
@@ -33,6 +26,16 @@ static int mtk_regulator_probe(struct udevice *dev)
       break;
     }
   }
+
+  return 0;
+}
+
+static int mtk_regulator_probe(struct udevice *dev)
+{
+  struct mtk_regulator_priv *priv = dev_get_priv(dev);
+  struct udevice *pmic = dev_get_parent(dev);
+
+  priv->pwrap = dev_get_parent(pmic);
 
   return 0;
 }
@@ -109,5 +112,6 @@ U_BOOT_DRIVER(mtk_regulator) = {
   .id = UCLASS_REGULATOR,
   .ops = &mtk_regulator_ops,
   .probe = mtk_regulator_probe,
+  .of_to_plat = mtk_regulator_of_to_plat,
   .priv_auto = sizeof(struct mtk_regulator_priv),
 };
