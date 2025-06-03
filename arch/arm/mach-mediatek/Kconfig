@@ -29,6 +29,7 @@ choice
 
 config TARGET_MT6572
 	bool "MediaTek MT6572 SoC"
+	# select BOARD_EARLY_INIT_F
 	select CPU_V7A
 	select MMC_SUPPORTS_TUNING
 	help
