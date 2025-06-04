@@ -3,8 +3,7 @@
 obj-$(CONFIG_ARCH_MEDIATEK) += clk-mtk.o
 
 # SoC Drivers
-# TODO: nuke this
-obj-$(CONFIG_TARGET_MT6572) += clk-mt6580.o
+obj-$(CONFIG_TARGET_MT6572) += clk-mt6572.o
 obj-$(CONFIG_TARGET_MT6580) += clk-mt6580.o
 obj-$(CONFIG_TARGET_MT7623) += clk-mt7623.o
 obj-$(CONFIG_TARGET_MT7622) += clk-mt7622.o
