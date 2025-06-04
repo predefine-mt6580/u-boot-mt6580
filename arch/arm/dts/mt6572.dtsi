@@ -88,14 +88,14 @@
     };
 
     wdt: watchdog@10007000 {
-      compatible = "mediatek,mt6589-wdt";
+      compatible = "mediatek,wdt";
       reg = <0x10007000 0x100>;
       timeout-sec = <15>;
       interrupts = <GIC_SPI 126 IRQ_TYPE_LEVEL_LOW>;
     };
       
     gpt: timer@10008000 {
-      compatible = "mediatek,mt6577-timer";
+      compatible = "mediatek,timer";
       reg = <0x10008000 0x80>;
       interrupts = <GIC_SPI 74 IRQ_TYPE_LEVEL_LOW>;
       clocks = <&system_clk>, <&rtc32k>;
