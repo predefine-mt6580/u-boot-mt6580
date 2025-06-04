@@ -6,7 +6,7 @@
  *
  */
 
-/* based on upstream mt6323.dtsi */
+/* Based on upstream: arch/arm/boot/dts/mt6323.dtsi */
 &pwrap {
 	pmic: mt6350 {
 		compatible = "mediatek,mt6350";
