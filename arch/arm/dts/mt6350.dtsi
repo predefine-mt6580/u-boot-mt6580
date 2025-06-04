@@ -207,13 +207,5 @@
 				linux,keycodes = <114>;
 			};
 		};
-
-		power-controller {
-			compatible = "mediatek,mt6350-pwrc";
-		};
-
-		rtc {
-			compatible = "mediatek,mt6350-rtc";
-		};
 	};
 };
