@@ -63,25 +63,25 @@
     ranges;
     
     topckgen: clock-controller@10000000 {
-      compatible = "mediatek,mt6580-topckgen";
+      compatible = "mediatek,mt6572-topckgen";
       reg = <0x10000000 0x1000>;
       #clock-cells = <1>;
     };
 
     topckgen_cg: clock-controller-cg@10000000 {
-      compatible = "mediatek,mt6580-topckgen-cg";
+      compatible = "mediatek,mt6572-topckgen-cg";
       reg = <0x10000000 0x1000>;
       #clock-cells = <1>;
     };
 
     apmixedsys: clock-controller@10205000	 {
-      compatible = "mediatek,mt6580-apmixedsys";
+      compatible = "mediatek,mt6572-apmixedsys";
       reg = <0x10205000	0x1000>;
       #clock-cells = <1>;
     };
     
     mmsys_cg: clock-controller@14000000 {
-      compatible = "mediatek,mt6580-mmsys-cg";
+      compatible = "mediatek,mt6572-mmsys-cg";
       reg = <0x14000000 0x1000>;
       #clock-cells = <1>;
     };
