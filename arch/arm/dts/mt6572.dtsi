@@ -1,6 +1,5 @@
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/interrupt-controller/arm-gic.h>
-#include <dt-bindings/phy/phy.h>
 
 / {
   compatible = "mediatek,mt6572";
