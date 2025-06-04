@@ -116,7 +116,7 @@
 				regulator-enable-ramp-delay = <36>;
 				regulator-boot-on;
 			};
-			/*
+
 			mt6323_vemc3v3_reg: ldo_vemc3v3 {
 				regulator-name = "vemc3v3";
 				regulator-min-microvolt = <3000000>;
@@ -125,6 +125,16 @@
 				regulator-boot-on;
 			};
 
+			mt6323_vio18_reg: ldo_vio18 {
+				regulator-name = "vio18";
+				regulator-min-microvolt = <1800000>;
+				regulator-max-microvolt = <1800000>;
+				regulator-enable-ramp-delay = <216>;
+				regulator-always-on;
+				regulator-boot-on;
+			};
+
+			/*
 			mt6323_vgp1_reg: ldo_vgp1 {
 				regulator-name = "vgp1";
 				regulator-min-microvolt = <1200000>;
@@ -205,15 +215,7 @@
 				regulator-boot-on;
 			};
 
-			mt6323_vio18_reg: ldo_vio18 {
-				regulator-name = "vio18";
-				regulator-min-microvolt = <1800000>;
-				regulator-max-microvolt = <1800000>;
-				regulator-enable-ramp-delay = <216>;
-				regulator-always-on;
-				regulator-boot-on;
-			};
-
+			/*
 			mt6323_vcamd_reg: ldo_vcamd {
 				regulator-name = "vcamd";
 				regulator-min-microvolt = <1200000>;
