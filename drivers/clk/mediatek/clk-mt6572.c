@@ -7,8 +7,8 @@
 
 #include "clk-mtk.h"
 
-#define MT6580_PLL_FMAX			(1800UL * MHZ)
-#define MT6580_CON0_RST_BAR		BIT(27)
+#define MT6572_PLL_FMAX			(1800UL * MHZ)
+#define MT6572_CON0_RST_BAR		BIT(27)
 
 #define PLL(_id, _reg, _pwr_reg, _en_mask, _flags, _pcwbits, _pd_reg,	\
 	    _pd_shift, _pcw_reg, _pcw_shift) {				\
@@ -16,8 +16,8 @@
 		.reg = _reg,						\
 		.pwr_reg = _pwr_reg,					\
 		.en_mask = _en_mask,					\
-		.rst_bar_mask = MT6580_CON0_RST_BAR,			\
-		.fmax = MT6580_PLL_FMAX,				\
+		.rst_bar_mask = MT6572_CON0_RST_BAR,			\
+		.fmax = MT6572_PLL_FMAX,				\
 		.flags = _flags,					\
 		.pcwbits = _pcwbits,					\
 		.pd_reg = _pd_reg,					\
@@ -161,7 +161,7 @@ static const struct mtk_gate mmsys_cgs[] = {
 	GATE_MMSYS1_XTAL(CLK_MMSYS_PWM_26M, CLK_XTAL, 1),
 };
 
-static const struct mtk_clk_tree mt6580_clk_tree = {
+static const struct mtk_clk_tree mt6572_clk_tree = {
 	.xtal_rate = 26 * MHZ,
 	.xtal2_rate = 26 * MHZ,
 	.fdivs_offs = CLK_TOP_MPLL,
@@ -171,81 +171,81 @@ static const struct mtk_clk_tree mt6580_clk_tree = {
 	.muxes = top_muxes,
 };
 
-static int mt6580_apmixedsys_probe(struct udevice *dev)
+static int mt6572_apmixedsys_probe(struct udevice *dev)
 {
-	return mtk_common_clk_init(dev, &mt6580_clk_tree);
+	return mtk_common_clk_init(dev, &mt6572_clk_tree);
 }
 
-static int mt6580_topckgen_probe(struct udevice *dev)
+static int mt6572_topckgen_probe(struct udevice *dev)
 {
-	return mtk_common_clk_init(dev, &mt6580_clk_tree);
+	return mtk_common_clk_init(dev, &mt6572_clk_tree);
 }
 
-static int mt6580_topckgen_cg_probe(struct udevice *dev)
+static int mt6572_topckgen_cg_probe(struct udevice *dev)
 {
-	return mtk_common_clk_gate_init(dev, &mt6580_clk_tree, top_cgs);
+	return mtk_common_clk_gate_init(dev, &mt6572_clk_tree, top_cgs);
 }
 
-static int mt6580_mmsys_cg_probe(struct udevice *dev)
+static int mt6572_mmsys_cg_probe(struct udevice *dev)
 {
-	return mtk_common_clk_gate_init(dev, &mt6580_clk_tree, mmsys_cgs);
+	return mtk_common_clk_gate_init(dev, &mt6572_clk_tree, mmsys_cgs);
 }
 
-static const struct udevice_id mt6580_apmixed_compat[] = {
-	{ .compatible = "mediatek,mt6580-apmixedsys" },
+static const struct udevice_id mt6572_apmixed_compat[] = {
+	{ .compatible = "mediatek,mt6572-apmixedsys" },
 	{ }
 };
 
-static const struct udevice_id mt6580_topckgen_compat[] = {
-	{ .compatible = "mediatek,mt6580-topckgen" },
+static const struct udevice_id mt6572_topckgen_compat[] = {
+	{ .compatible = "mediatek,mt6572-topckgen" },
 	{ }
 };
 
-static const struct udevice_id mt6580_topckgen_cg_compat[] = {
-	{ .compatible = "mediatek,mt6580-topckgen-cg" },
+static const struct udevice_id mt6572_topckgen_cg_compat[] = {
+	{ .compatible = "mediatek,mt6572-topckgen-cg" },
 	{ }
 };
 
-static const struct udevice_id mt6580_mmsys_cg_compat[] = {
-	{ .compatible = "mediatek,mt6580-mmsys-cg" },
+static const struct udevice_id mt6572_mmsys_cg_compat[] = {
+	{ .compatible = "mediatek,mt6572-mmsys-cg" },
 	{ }
 };
 
 U_BOOT_DRIVER(mtk_clk_apmixedsys) = {
-	.name = "mt6580-clock-apmixedsys",
+	.name = "mt6572-clock-apmixedsys",
 	.id = UCLASS_CLK,
-	.of_match = mt6580_apmixed_compat,
-	.probe = mt6580_apmixedsys_probe,
+	.of_match = mt6572_apmixed_compat,
+	.probe = mt6572_apmixedsys_probe,
 	.priv_auto	= sizeof(struct mtk_clk_priv),
 	.ops = &mtk_clk_apmixedsys_ops,
 	.flags = DM_FLAG_PRE_RELOC,
 };
 
 U_BOOT_DRIVER(mtk_clk_topckgen) = {
-	.name = "mt6580-clock-topckgen",
+	.name = "mt6572-clock-topckgen",
 	.id = UCLASS_CLK,
-	.of_match = mt6580_topckgen_compat,
-	.probe = mt6580_topckgen_probe,
+	.of_match = mt6572_topckgen_compat,
+	.probe = mt6572_topckgen_probe,
 	.priv_auto	= sizeof(struct mtk_clk_priv),
 	.ops = &mtk_clk_topckgen_ops,
 	.flags = DM_FLAG_PRE_RELOC,
 };
 
 U_BOOT_DRIVER(mtk_clk_topckgen_cg) = {
-	.name = "mt6580-topckgen-cg",
+	.name = "mt6572-topckgen-cg",
 	.id = UCLASS_CLK,
-	.of_match = mt6580_topckgen_cg_compat,
-	.probe = mt6580_topckgen_cg_probe,
+	.of_match = mt6572_topckgen_cg_compat,
+	.probe = mt6572_topckgen_cg_probe,
 	.priv_auto	= sizeof(struct mtk_cg_priv),
 	.ops = &mtk_clk_gate_ops,
 	.flags = DM_FLAG_PRE_RELOC,
 };
 
 U_BOOT_DRIVER(mtk_clk_mmsys_cg) = {
-	.name = "mt6580-mmsys-cg",
+	.name = "mt6572-mmsys-cg",
 	.id = UCLASS_CLK,
-	.of_match = mt6580_mmsys_cg_compat,
-	.probe = mt6580_mmsys_cg_probe,
+	.of_match = mt6572_mmsys_cg_compat,
+	.probe = mt6572_mmsys_cg_probe,
 	.priv_auto	= sizeof(struct mtk_cg_priv),
 	.ops = &mtk_clk_gate_ops,
 	.flags = DM_FLAG_PRE_RELOC,
