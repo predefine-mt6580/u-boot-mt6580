@@ -116,10 +116,10 @@
     pinctrl: pinctrl@10005000 {
       compatible = "mediatek,mt6572-pinctrl";
       reg = <0x10005000 0x1000>,
-            <0x10014000 0x1000>,
-            <0x10015000 0x1000>,
-            <0x10016000 0x1000>,
-            <0x10017000 0x1000>;
+            <0x10208000 0x1000>,
+            <0x10209000 0x1000>,
+            <0x1020a000 0x1000>,
+            <0x1020b000 0x1000>;
       reg-names = "gpio", "iocfg_t", 
                   "iocfg_b", "iocfg_l", "iocfg_r";		
       
