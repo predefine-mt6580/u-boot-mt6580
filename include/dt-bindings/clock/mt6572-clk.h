@@ -1,5 +1,5 @@
-#ifndef _DT_BINDINGS_CLK_MT6580_H
-#define _DT_BINDINGS_CLK_MT6580_H
+#ifndef _DT_BINDINGS_CLK_MT6572_H
+#define _DT_BINDINGS_CLK_MT6572_H
 
 /* Clocks */
 #define CLK_APMIXED_ARMPLL 1
@@ -44,4 +44,4 @@
 #define CLK_MMSYS_PWM_26M 1
 
 
-#endif /* _DT_BINDINGS_CLK_MT6580_H */
+#endif /* _DT_BINDINGS_CLK_MT6572_H */
