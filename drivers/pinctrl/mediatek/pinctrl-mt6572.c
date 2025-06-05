@@ -655,13 +655,13 @@ static int mtk_pinctrl_mt6572_probe(struct udevice *dev)
   if (err)
     return err;
 
-  // WORKAROUND: set msdc1 pins mode to "msdc mode"
+  // HACK: Set msdc1 pins mode to "msdc mode"
   // This is required to get msdc1 work
   // Based on downstream kernel source code
-  // version: 3.18.35
-  // file: drivers/mmc/host/mediatek/mt6580/sd.c
-  // line: 1577
-  mtk_i_rmw(dev, IOCFG_R_BASE, 0xA4, 0xffffffff, 0x3f);
+  // version: 3.10.89
+  // file: drivers/misc/mediatek/mmc-host/mt6572/sd.c
+  // line: 1065
+  mtk_i_rmw(dev, GPIO_BASE, 0x03B0, 0xffff0000, 0x11110000);
 
   return 0;
 }
