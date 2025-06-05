@@ -655,7 +655,7 @@ static int mtk_pinctrl_mt6580_probe(struct udevice *dev)
   if (err)
     return err;
 
-  // WORKAROUND: set msdc1 pins mode to "msdc mode"
+  // HACK: set msdc1 pins mode to "msdc mode"
   // This is required to get msdc1 work
   // Based on downstream kernel source code
   // version: 3.18.35
