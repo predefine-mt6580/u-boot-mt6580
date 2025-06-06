@@ -134,6 +134,6 @@
   sd-uhs-sdr50;
   vmmc-supply = <&mt6323_vmch_reg>;
   vqmmc-supply = <&mt6323_vmc_reg>;
-  cd-gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
+  cd-gpios = <&gpio 18 GPIO_ACTIVE_LOW>;
   status = "okay";
 };
