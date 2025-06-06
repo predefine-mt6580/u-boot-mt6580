@@ -52,6 +52,7 @@ config BUTTON_MTK_PMIC
 	bool "Enable MediaTek power button"
 	depends on BUTTON
 	depends on MTK_PMIC
+	depends on MTK_PWRAP
 	help
 		Enable support for the power button on MediaTek SoCs.
 
