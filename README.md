@@ -16,8 +16,8 @@ Prestigio Multipad Wize 3151 (MT8321): U-Boot replaces the LK.
 * Booting - **Y**;
 * UART - **Y**;
 * Display - **Y** (simple-framebuffer);
-* Internal storage / eMMC - **N**;
-* External storage / SD card - **N**;
+* Internal storage / eMMC - **P** (capped at 52MHz; can't read the MBR);
+* External storage / SD card - **P** (capped at 50MHz);
 * Buttons - **N**;
 * USB - **N**;
 
