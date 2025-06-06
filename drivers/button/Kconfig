@@ -48,4 +48,11 @@ config BUTTON_QCOM_PMIC
 	  on Qualcomm SoCs. These will be configured as the Enter and Down keys
 	  respectively, allowing navigation of bootmenu with buttons on device.
 
+config BUTTON_MTK_PMIC
+	bool "Enable MediaTek power button"
+	depends on BUTTON
+	depends on MTK_PMIC
+	help
+		Enable support for the power button on MediaTek SoCs.
+
 endmenu
