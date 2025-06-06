@@ -630,7 +630,7 @@ static const struct mtk_group_desc mt6580_groups[] = {
 static const char *const mt6580_msdc_groups[] = { "msdc0", "msdc1" };
 
 static const struct mtk_function_desc mt6580_functions[] = {
-  {"msdc", mt6580_msdc_groups, ARRAY_SIZE(mt6580_msdc_groups)},
+  { "msdc", mt6580_msdc_groups, ARRAY_SIZE(mt6580_msdc_groups) },
 };
 
 static const struct mtk_pinctrl_soc mt6580_data = {
