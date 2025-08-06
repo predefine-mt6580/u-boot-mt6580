@@ -355,7 +355,7 @@ u32 video_index_to_colour(struct video_priv *priv, enum colour_idx idx)
 				       (colours[idx].g << 16) |
 				       (colours[idx].b << 8) | 0xff;
 			default:
-				return (colours[idx].r << 16) |
+				return 0xff000000 | (colours[idx].r << 16) |
 				       (colours[idx].g <<  8) |
 				       (colours[idx].b <<  0);
 			}

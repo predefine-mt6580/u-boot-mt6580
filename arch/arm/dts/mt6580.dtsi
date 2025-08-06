@@ -3,6 +3,8 @@
 #include <dt-bindings/phy/phy.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/clock/mt6580-clk.h>
+#include <dt-bindings/memory/mt6580-larb-port.h>
+#include <dt-bindings/video/mt6580.h>
 
 / {
   compatible = "mediatek,mt6580";
@@ -39,6 +41,18 @@
     };
   };
 
+  clocks {
+    //#address-cells = <1>;
+    //#size-cells = <1>;
+    //ranges;
+    rtc32k: oscillator-0 {
+      compatible = "fixed-clock";
+      clock-frequency = <32000>;
+      #clock-cells = <0>;
+      clock-output-names = "rtc32k";
+    };
+  };
+
   wdt-reboot {
     compatible = "wdt-reboot";
     wdt = <&wdt>;
@@ -60,12 +74,14 @@
     topckgen: clock-controller@10000000 {
       compatible = "mediatek,mt6580-topckgen";
       reg = <0x10000000 0x1000>;
+      clock-parent = <&apmixedsys>;
       #clock-cells = <1>;
     };
 
     topckgen_cg: clock-controller-cg@10000000 {
       compatible = "mediatek,mt6580-topckgen-cg";
       reg = <0x10000000 0x1000>;
+      clock-parent = <&topckgen>;
       #clock-cells = <1>;
     };
 
@@ -85,7 +101,7 @@
       compatible = "mediatek,timer";
       reg = <0x10008000 0x80>;
       interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_LOW>;
-      clocks = <&topckgen_cg CLK_TOP_APXGPT>;
+      clocks = <&topckgen_cg CLK_TOP_APXGPT>, <&rtc32k>;
     };
 
     gic: interrupt-controller@10210000 {
@@ -160,6 +176,7 @@
     mmsys_cg: clock-controller@14000000 {
       compatible = "mediatek,mt6580-mmsys-cg";
       reg = <0x14000000 0x1000>;
+      clock-parent = <&topckgen>;
       #clock-cells = <1>;
     };
 
@@ -174,6 +191,121 @@
       period = <1023>;
       level = <1023>;
       default-state = "on";
+    };
+
+    iommu: iommu@10203000 {
+      #iommu-cells = <1>;
+      reg = <0x10203000 0x1000>;
+      compatible = "mediatek,mt6580-m4u", "mediatek,m4u";
+      // mt6580 dont have cg for m4u
+      // clocks = <&sys26m>;
+      mediatek,larbs = <&larb0>;
+    };
+
+    larb0: larb@14016000 {
+      reg = <0x14016000 0x1000>;
+      compatible = "mediatek,mt6580-smi-larb", "mediatek,smi-larb";
+      clocks = <&mmsys_cg CLK_MMSYS_SMI_LARB0>;
+    };
+
+    mmsys: syscon@14000000 {
+      compatible = "mediatek,mt6580-mmsys";
+      reg = <0x14000000 0x1000>;
+      // mt6580 dont have cg for mmsys
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+          mmsys_display_0: endpoint {};
+        };
+      };
+    };
+
+    mutex: mutex@14015000 {
+      compatible = "mediatek,mt6580-disp-mutex";
+      reg = <0x14015000 0x1000>;
+      // mt6580 dont have cg for mutex
+      #mutex-cells = <2>;
+    };
+
+    ovl0: ovl@14007000 {
+      compatible = "mediatek,mt6580-disp-ovl";
+      reg = <0x14007000 0x1000>;
+      clocks = <&mmsys_cg CLK_MMSYS_OVL0>;
+      iommus = <&iommu M4U_PORT_DISP_OVL0>;
+      mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_OVL0>;
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+          ovl0_in: endpoint {};
+        };
+
+        port@1 {
+          reg = <1>;
+          ovl0_out: endpoint {};
+        };
+      };
+    };
+
+    rdma0: rdma@14009000 {
+      compatible = "mediatek,mt6580-disp-rdma";
+      reg = <0x14009000 0x1000>;
+      clocks = <&mmsys_cg CLK_MMSYS_RDMA0>;
+      iommus = <&iommu M4U_PORT_DISP_RDMA0>;
+      mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_RDMA0>;
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+          rdma0_in: endpoint {};
+        };
+
+        port@1 {
+          reg = <1>;
+          rdma0_out: endpoint {};
+        };
+      };
+    };
+
+    mipi_tx0: dsi-phy@14018000 {
+      compatible = "mediatek,mt6580-mipi-tx";
+      reg = <0x14018000 0x1000>;
+      #phy-cells = <0>;
+    };
+
+    dsi0: dsi@14012000 {
+      compatible = "mediatek,mt6580-dsi";
+      reg = <0x14012000 0x1000>;
+      clocks = <&mmsys_cg CLK_MMSYS_DSI_ENGINE>,
+               <&mmsys_cg CLK_MMSYS_DSI_DIGITAL>;
+      clock-names = "engine", "digital";
+
+      phys = <&mipi_tx0>;
+      phy-names = "dphy";
+
+      ports {
+        #address-cells = <1>;
+        #size-cells = <0>;
+
+        port@0 {
+          reg = <0>;
+          dsi0_in: endpoint {};
+        };
+
+        port@1 {
+          reg = <1>;
+          dsi0_out: endpoint {};
+        };
+      };
     };
   };
 };

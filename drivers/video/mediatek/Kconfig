@@ -1,0 +1,28 @@
+menuconfig VIDEO_MTK
+	bool "Enable Mediatek Video Support"
+	depends on VIDEO && VIDEO_BRIDGE && PANEL
+
+if VIDEO_MTK
+
+config VIDEO_MTK_DSI
+	bool "Mediatek DSI"
+	depends on VIDEO_MTK && VIDEO_MIPI_DSI
+  select PHY_MTK_DPHY
+
+config VIDEO_MTK_MUTEX
+	bool "Mediatek MUTEX"
+	depends on VIDEO_MTK
+
+config VIDEO_MTK_MMSYS
+	bool "Mediatek MMSYS"
+	depends on VIDEO_MTK
+
+config VIDEO_MTK_OVL
+	bool "Mediatek OVL"
+	depends on VIDEO_MTK
+
+config VIDEO_MTK_RDMA
+	bool "Mediatek RDMA"
+	depends on VIDEO_MTK
+
+endif

@@ -37,6 +37,13 @@ static u32 mt63xx_vmch_voltages[] = {
 	3300000
 };
 
+static u32 mt63xx_vgp3_voltages[] = {
+	1200000,
+  1300000,
+  1500000,
+  1800000
+};
+
 static struct mtk_pmic_regulator mt63xx_regulators[] = {
 	{
 		.name = "vmc",
@@ -52,6 +59,13 @@ static struct mtk_pmic_regulator mt63xx_regulators[] = {
 		.voltages_count = 2,
 		.voltages = mt63xx_vmch_voltages,
 	},
+  {
+    .name = "vgp3",
+    .en = MTK_PMIC_REG(0x50e, 1, 15),
+    .vosel = MTK_PMIC_REG(0x534, 3, 5),
+    .voltages_count = 4,
+    .voltages = mt63xx_vgp3_voltages,
+  },
 	{ },
 };
 

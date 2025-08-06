@@ -111,3 +111,64 @@
   cd-gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
   status = "okay";
 };
+
+// DISPLAY
+&mmsys {
+  // ovl0 -> color0 -> internal
+  // internal -> dither0 -> rdma0 -> dsi0
+  // internal: color0 -> aal0 -> gamma0 -> dither0
+
+  mediatek,path = <DISP_PATH(OVL0_MOUT,   COLOR0)>, // ovl -> color0
+                  <DISP_PATH(COLOR0_IN,   OVL0)>,   //
+                  <DISP_PATH(DITHER_MOUT, RDMA0)>,  // dither -> rdma
+                  <DISP_PATH(RDMA0_OUT,   DSI0)>,   // rdma -> dsi0
+                  <DISP_PATH(DSI0_IN,     RDMA0)>;  //
+};
+
+// mmsys_display_0 -> ovl0_in
+&mmsys_display_0 {
+  remote-endpoint = <&ovl0_in>;
+};
+&ovl0_in {
+  remote-endpoint = <&mmsys_display_0>;
+};
+
+// ovl0_out -> rdma0_in
+&ovl0_out {
+  remote-endpoint = <&rdma0_in>;
+};
+&rdma0_in {
+  remote-endpoint = <&ovl0_out>;
+};
+
+// rdma0_out -> dsi0_in
+&rdma0_out {
+  remote-endpoint = <&dsi0_in>;
+};
+&dsi0_in {
+  remote-endpoint = <&rdma0_out>;
+};
+
+// dsi0_out -> panel_in
+&dsi0_out {
+  remote-endpoint = <&panel_in>;
+};
+
+/ {
+  panel: panel {
+    compatible = "k710_hz_jd9366_boe_wxga_ips_101";
+
+    enable-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>, // controller(ENN)
+                   <&gpio 11 GPIO_ACTIVE_HIGH>; // panel(ENP)
+
+    reset-gpios = <&gpio 70 GPIO_ACTIVE_HIGH>;
+
+    power-supply = <&mt6350_vgp3_reg>;
+
+    port {
+      panel_in: endpoint {
+        remote-endpoint = <&dsi0_out>;
+      };
+    };
+  };
+};

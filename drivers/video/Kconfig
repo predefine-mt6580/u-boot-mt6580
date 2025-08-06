@@ -641,6 +641,11 @@ config VIDEO_LCD_SHARP_LQ101R1SX01
 	  LCD module found in ASUS Transformer TF701T. The panel has a
 	  WQXGA resolution (2560x1600).
 
+config VIDEO_LCD_K710_HZ_JD9366_BOE_WXGA_IPS_101
+  tristate "k710 hz jd9366 boe WXGA IPS 10'1 1280x800 DSI video mode panel"
+  depends on PANEL && BACKLIGHT
+  select VIDEO_MIPI_DSI
+
 config VIDEO_LCD_SSD2828
 	bool "SSD2828 bridge chip"
 	---help---
@@ -888,6 +893,8 @@ source "drivers/video/bridge/Kconfig"
 source "drivers/video/tegra/Kconfig"
 
 source "drivers/video/imx/Kconfig"
+
+source "drivers/video/mediatek/Kconfig"
 
 config VIDEO_MXS
 	bool "Enable video support on i.MX28/i.MX6UL/i.MX7 SoCs"

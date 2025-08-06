@@ -139,11 +139,28 @@ static const struct mtk_gate top_cgs[] = {
 	// TODO: add more gates
 };
 
+static const struct mtk_gate_regs mmsys0_cg_regs = {
+	.sta_ofs = 0x100,
+	.set_ofs = 0x104,
+	.clr_ofs = 0x108,
+};
+
 static const struct mtk_gate_regs mmsys1_cg_regs = {
 	.sta_ofs = 0x110,
 	.set_ofs = 0x114,
 	.clr_ofs = 0x118,
 };
+
+#define GATE_MMSYS0_FLAGS(_id, _parent, _shift, _flags) {		\
+		.id = _id,					\
+		.parent = _parent,				\
+		.regs = &mmsys0_cg_regs,				\
+		.shift = _shift,				\
+		.flags = _flags,				\
+	}
+
+#define GATE_MMSYS0_XTAL(_id, _parent, _shift) \
+	GATE_MMSYS0_FLAGS(_id, _parent, _shift, CLK_GATE_SETCLR | CLK_PARENT_XTAL)
 
 #define GATE_MMSYS1_FLAGS(_id, _parent, _shift, _flags) {		\
 		.id = _id,					\
@@ -157,8 +174,15 @@ static const struct mtk_gate_regs mmsys1_cg_regs = {
 	GATE_MMSYS1_FLAGS(_id, _parent, _shift, CLK_GATE_SETCLR | CLK_PARENT_XTAL)
 
 static const struct mtk_gate mmsys_cgs[] = {
+  GATE_MMSYS0_XTAL(CLK_MMSYS_SMI_COMMON, CLK_XTAL, 0),
+  GATE_MMSYS0_XTAL(CLK_MMSYS_SMI_LARB0, CLK_XTAL, 1),
+  GATE_MMSYS0_XTAL(CLK_MMSYS_OVL0, CLK_XTAL, 10),
+  GATE_MMSYS0_XTAL(CLK_MMSYS_RDMA0, CLK_XTAL, 11),
+
 	GATE_MMSYS1_XTAL(CLK_MMSYS_PWM_MM, CLK_XTAL, 0),
 	GATE_MMSYS1_XTAL(CLK_MMSYS_PWM_26M, CLK_XTAL, 1),
+  GATE_MMSYS1_XTAL(CLK_MMSYS_DSI_ENGINE, CLK_XTAL, 2),
+  GATE_MMSYS1_XTAL(CLK_MMSYS_DSI_DIGITAL, CLK_XTAL, 3),
 };
 
 static const struct mtk_clk_tree mt6580_clk_tree = {
