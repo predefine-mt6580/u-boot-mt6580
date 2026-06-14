@@ -14,27 +14,34 @@ struct k710_hz_jd9366_boe_wxga_ips_101_priv {
 };
 
 static struct display_timing default_timing = {
-	.pixelclock.typ   = 70000000,
-	.hactive.typ      = 800,
-	.hfront_porch.typ = 18,
-	.hback_porch.typ  = 18,
-	.hsync_len.typ    = 18,
-	.vactive.typ      = 1280,
-	.vfront_porch.typ	= 24,
-	.vback_porch.typ  = 8,
-	.vsync_len.typ    = 4,
+    .pixelclock.typ   = 70000000,
+    .hactive.typ      = 800,
+    .hfront_porch.typ = 18,
+    .hback_porch.typ  = 18,
+    .hsync_len.typ    = 18,
+    .vactive.typ      = 1280,
+    .vfront_porch.typ = 24,
+    .vback_porch.typ  = 8,
+    .vsync_len.typ    = 4,
 };
 
 static void dcs_write_one(struct mipi_dsi_device *dsi, u8 cmd, u8 data)
 {
-	mipi_dsi_dcs_write(dsi, cmd, &data, 1);
+    mipi_dsi_dcs_write(dsi, cmd, &data, 1);
 }
 
 static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
 {
+  struct k710_hz_jd9366_boe_wxga_ips_101_priv *priv = dev_get_priv(dev);
   struct mipi_dsi_panel_plat *plat = dev_get_plat(dev);
   struct mipi_dsi_device *dsi = plat->device;
   int ret;
+
+  ret = dm_gpio_set_value(&priv->gpio_rst, 1);
+  if (ret)
+    return ret;
+
+  mdelay(80);
 
   dcs_write_one(dsi, 0xE0, 0x00);
   dcs_write_one(dsi, 0xE1, 0x93);
@@ -205,17 +212,22 @@ static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
   dcs_write_one(dsi, 0xE6, 0x02);
   dcs_write_one(dsi, 0xE7, 0x02);
 
-	ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
-	if (ret)
-		return ret;
-
-	mdelay(120);
-
-	ret = mipi_dsi_dcs_set_display_on(dsi);
-	if (ret)
-		return ret;
+  ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
+  if (ret)
+      return ret;
 
   mdelay(120);
+
+  ret = mipi_dsi_dcs_set_display_on(dsi);
+  if (ret)
+      return ret;
+
+  mdelay(120);
+  mdelay(20);
+  ret = dm_gpio_set_value(&priv->gpio_enp, 1);
+    if (ret)
+    return ret;
+
 
   return 0;
 }
@@ -228,9 +240,9 @@ static int k710_hz_jd9366_boe_wxga_ips_101_timings(struct udevice *dev,
 }
 
 static const struct panel_ops k710_hz_jd9366_boe_wxga_ips_101_ops = {
-	.enable_backlight	= k710_hz_jd9366_boe_wxga_ips_101_enable_backlight,
-	//.set_backlight		= k710_hz_jd9366_boe_wxga_ips_101_set_backlight,
-	.get_display_timing	= k710_hz_jd9366_boe_wxga_ips_101_timings,
+    .enable_backlight	= k710_hz_jd9366_boe_wxga_ips_101_enable_backlight,
+    //.set_backlight		= k710_hz_jd9366_boe_wxga_ips_101_set_backlight,
+    .get_display_timing	= k710_hz_jd9366_boe_wxga_ips_101_timings,
 };
 
 static int k710_hz_jd9366_boe_wxga_ips_101_hw_init(struct udevice *dev)
@@ -238,43 +250,43 @@ static int k710_hz_jd9366_boe_wxga_ips_101_hw_init(struct udevice *dev)
   struct k710_hz_jd9366_boe_wxga_ips_101_priv *priv = dev_get_priv(dev);
   int ret;
 
-	ret = dm_gpio_set_value(&priv->gpio_enn, 1);
-	if (ret)
+  ret = dm_gpio_set_value(&priv->gpio_enn, 1);
+  if (ret)
     return ret;
 
-	ret = dm_gpio_set_value(&priv->gpio_enp, 1);
-	if (ret)
+  mdelay(50);
+
+  ret = dm_gpio_set_value(&priv->gpio_enp, 1);
+  if (ret)
     return ret;
 
   ret = regulator_set_value(priv->power, 1800000);
   if (ret)
     return ret;
 
-	ret = regulator_set_enable_if_allowed(priv->power, 1);
-	if (ret)
+  ret = regulator_set_enable_if_allowed(priv->power, 1);
+  if (ret)
     return ret;
 
-  mdelay(80);
-	ret = dm_gpio_set_value(&priv->gpio_rst, 1);
-	if (ret)
+  mdelay(30);
+
+  ret = dm_gpio_set_value(&priv->gpio_rst, 1);
+  if (ret)
     return ret;
 
   mdelay(50);
   ret = dm_gpio_set_value(&priv->gpio_rst, 0);
-	if (ret)
+  if (ret)
     return ret;
 
   mdelay(50);
+
   ret = dm_gpio_set_value(&priv->gpio_rst, 1);
-	if (ret)
+  if (ret)
     return ret;
+
 
   mdelay(80);
-
-	ret = dm_gpio_set_value(&priv->gpio_enp, 1);
-	if (ret)
-    return ret;
-
   return 0;
 }
 
@@ -283,24 +295,24 @@ static int k710_hz_jd9366_boe_wxga_ips_101_of_to_plat(struct udevice *dev)
   struct k710_hz_jd9366_boe_wxga_ips_101_priv *priv = dev_get_priv(dev);
   int ret;
 
-	ret = device_get_supply_regulator(dev, "power-supply", &priv->power);
-	if (ret)
-		return ret;
+  ret = device_get_supply_regulator(dev, "power-supply", &priv->power);
+  if (ret)
+    return ret;
 
-	ret = gpio_request_by_name(dev, "enable-gpios", 0,
-				   &priv->gpio_enn, GPIOD_IS_OUT);
-	if (ret)
-		return ret;
+  ret = gpio_request_by_name(dev, "enable-gpios", 0,
+                  &priv->gpio_enn, GPIOD_IS_OUT);
+  if (ret)
+    return ret;
 
   ret = gpio_request_by_name(dev, "enable-gpios", 1,
-				   &priv->gpio_enp, GPIOD_IS_OUT);
-	if (ret)
-		return ret;
-  
+                  &priv->gpio_enp, GPIOD_IS_OUT);
+  if (ret)
+    return ret;
+
   ret = gpio_request_by_name(dev, "reset-gpios", 0,
-				   &priv->gpio_rst, GPIOD_IS_OUT);
-	if (ret)
-		return ret;
+                  &priv->gpio_rst, GPIOD_IS_OUT);
+  if (ret)
+    return ret;
 
   return 0;
 }
@@ -312,7 +324,7 @@ static int k710_hz_jd9366_boe_wxga_ips_101_probe(struct udevice *dev)
   plat->lanes = 3;
   plat->format = MIPI_DSI_FMT_RGB888;
   plat->mode_flags = MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_SYNC_PULSE;
- 
+
   return k710_hz_jd9366_boe_wxga_ips_101_hw_init(dev);
 }
 
@@ -327,7 +339,7 @@ U_BOOT_DRIVER(k710_hz_jd9366_boe_wxga_ips_101) = {
   .of_match = k710_hz_jd9366_boe_wxga_ips_101_ids,
   .ops = &k710_hz_jd9366_boe_wxga_ips_101_ops,
   .probe = k710_hz_jd9366_boe_wxga_ips_101_probe,
- 	.of_to_plat	= k710_hz_jd9366_boe_wxga_ips_101_of_to_plat,
-	.plat_auto = sizeof(struct mipi_dsi_panel_plat),
-	.priv_auto = sizeof(struct k710_hz_jd9366_boe_wxga_ips_101_priv),
+  .of_to_plat	= k710_hz_jd9366_boe_wxga_ips_101_of_to_plat,
+  .plat_auto = sizeof(struct mipi_dsi_panel_plat),
+  .priv_auto = sizeof(struct k710_hz_jd9366_boe_wxga_ips_101_priv),
 };
