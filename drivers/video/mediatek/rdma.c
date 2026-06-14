@@ -92,7 +92,7 @@ static int mtk_rdma_attach(struct udevice *dev)
 
   clrsetbits_32(base + DISP_RDMA_FIFO_CON,
                 DISP_RDMA_FIFO_CON_OUTPUT_VALID_FIFO_THRESHOLD_MASK,
-                ((mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix) * 125) / (16 * 1000)) << DISP_RDMA_FIFO_CON_OUTPUT_VALID_FIFO_THRESHOLD_OFFSET);
+                ((mmsys_uc_priv->xsize * 3 * 125) / (16 * 1000)) << DISP_RDMA_FIFO_CON_OUTPUT_VALID_FIFO_THRESHOLD_OFFSET);
   setbits_32(base + DISP_RDMA_FIFO_CON, DISP_RDMA_FIFO_CON_UNDERFLOW_EN);
   writel(0x1f, base + DISP_RDMA_INT_ENABLE);
 

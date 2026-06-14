@@ -22,9 +22,7 @@
 #define DISP_OVL_SRC_CON 0x2C
 
 #define DISP_OVL_L0_CON 0x30
-#define DISP_OVL_L0_CON_CFMT_ARGB8888 3
-#define DISP_OVL_L0_CON_BTSW BIT(24)
-#define DISP_OVL_L0_CON_AEN BIT(8)
+#define DISP_OVL_L0_CON_CFMT_ABGR8888 3
 
 #define DISP_OVL_L0_SRC_SIZE 0x38
 #define DISP_OVL_L0_OFFSET 0x3C
@@ -38,16 +36,16 @@
 static void mtk_ovl_layer0_config(void __iomem *base, ulong fb_addr,
                 u32 width, u32 height, u32 pitch)
 {
-  u32 l0_con = (DISP_OVL_L0_CON_CFMT_ARGB8888 << 12) | DISP_OVL_L0_CON_BTSW | DISP_OVL_L0_CON_AEN;
+  u32 l0_con = (DISP_OVL_L0_CON_CFMT_ABGR8888 << 12);
 
+  writel(1, base + DISP_OVL_RDMA0_CTRL);
   writel(l0_con, base + DISP_OVL_L0_CON);
   writel(0, base + DISP_OVL_L0_OFFSET);
+  writel(fb_addr, base + DISP_OVL_L0_ADDR);
   writel((height << 16) | width, base + DISP_OVL_L0_SRC_SIZE);
   writel(pitch, base + DISP_OVL_L0_PITCH);
-  writel(fb_addr, base + DISP_OVL_L0_ADDR);
-  writel(1, base + DISP_OVL_RDMA0_CTRL);
   writel(0x6070, base + DISP_OVL_RDMA0_MEM_GMC_SETTING);
-  setbits_32(base + DISP_OVL_SRC_CON, BIT(0));
+  writel(BIT(0), base + DISP_OVL_SRC_CON);
 }
 
 static int mtk_ovl_probe(struct udevice *dev)
@@ -95,19 +93,19 @@ static int mtk_ovl_attach(struct udevice *dev)
 
   writel(mmsys_uc_priv->xsize << DISP_OVL_ROI_SIZE_W_OFFSET |
          mmsys_uc_priv->ysize << DISP_OVL_ROI_SIZE_H_OFFSET, base + DISP_OVL_ROI_SIZE);
-  writel(0xff0000ff, base + DISP_OVL_ROI_BGCLR);
+  writel(0xff00ff00, base + DISP_OVL_ROI_BGCLR);
 
   ret = mtk_video_common_attach(dev);
   if (ret < 0)
     return ret;
 
-  writel(0xE, base + DISP_OVL_INTEN);
 
   pitch = mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix);
 
   mtk_ovl_layer0_config(base, mmsys_plat->base, mmsys_uc_priv->xsize,
               mmsys_uc_priv->ysize, VNBYTES(mmsys_uc_priv->bpix));
 
+  writel(0xE, base + DISP_OVL_INTEN);
   writel(1, base + DISP_OVL_EN);
   setbits_32(base + DISP_OVL_DATAPATH_CON, DISP_OVL_DATAPATH_CON_LAYER_SMI_ID_EN);
 
