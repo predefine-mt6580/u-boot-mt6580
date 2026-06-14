@@ -166,7 +166,7 @@ static int mtk_dsi_get_phy_config(struct udevice *dev)
   unsigned long long ui;
   int ret;
 
-  priv->bpp = mipi_dsi_pixel_format_to_bpp(priv->device.format);
+  priv->bpp = mipi_dsi_pixel_format_to_bpp(priv->device.format) / 8;
   if (priv->bpp < 0)
     return priv->bpp;
 
@@ -277,9 +277,9 @@ static int mtk_dsi_hw_init(struct udevice *dev)
 
     if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE) {
       clrsetbits_32(priv->base + DSI_HSA_WC, 0xfff,
-                  ALIGN(priv->timings.hsync_len.typ * priv->bpp, 4) & 0xfff);
+                  ALIGN(priv->timings.hsync_len.typ * priv->bpp - 10, 4) & 0xfff);
       clrsetbits_32(priv->base + DSI_HBP_WC, 0xfff,
-                  ALIGN(priv->timings.hback_porch.typ * priv->bpp, 4) & 0xfff);
+                  ALIGN(priv->timings.hback_porch.typ * priv->bpp - 10, 4) & 0xfff);
     } else {
       clrsetbits_32(priv->base + DSI_HSA_WC, 0xfff,
                   ALIGN(priv->timings.hsync_len.typ * priv->bpp - 4, 4) & 0xfff);
