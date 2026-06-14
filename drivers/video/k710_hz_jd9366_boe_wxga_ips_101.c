@@ -28,6 +28,7 @@ static struct display_timing default_timing = {
 static void dcs_write_one(struct mipi_dsi_device *dsi, u8 cmd, u8 data)
 {
     mipi_dsi_dcs_write(dsi, cmd, &data, 1);
+    mdelay(1);
 }
 
 static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
@@ -36,12 +37,6 @@ static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
   struct mipi_dsi_panel_plat *plat = dev_get_plat(dev);
   struct mipi_dsi_device *dsi = plat->device;
   int ret;
-
-  ret = dm_gpio_set_value(&priv->gpio_rst, 1);
-  if (ret)
-    return ret;
-
-  mdelay(80);
 
   dcs_write_one(dsi, 0xE0, 0x00);
   dcs_write_one(dsi, 0xE1, 0x93);
@@ -268,7 +263,7 @@ static int k710_hz_jd9366_boe_wxga_ips_101_hw_init(struct udevice *dev)
   if (ret)
     return ret;
 
-  mdelay(30);
+  mdelay(80);
 
   ret = dm_gpio_set_value(&priv->gpio_rst, 1);
   if (ret)
@@ -287,6 +282,7 @@ static int k710_hz_jd9366_boe_wxga_ips_101_hw_init(struct udevice *dev)
 
 
   mdelay(80);
+
   return 0;
 }
 

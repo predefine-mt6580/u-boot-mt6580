@@ -5,6 +5,8 @@
 #include <linux/io.h>
 #include "common.h"
 
+#define DISP_RDMA_INT_ENABLE 0x00
+
 #define DISP_RDMA_GLOBAL_CON 0x10
 #define DISP_RDMA_GLOBAL_CON_ENGINE_EN BIT(0)
 #define DISP_RDMA_GLOBAL_CON_MODE_SEL  BIT(1)
@@ -59,7 +61,6 @@ static int mtk_rdma_attach(struct udevice *dev)
   int ret;
   void __iomem *base;
   struct udevice *mmsys;
-  struct video_uc_plat *mmsys_plat;
   struct video_priv *mmsys_uc_priv;
 
   base = dev_read_addr_ptr(dev);
@@ -70,7 +71,6 @@ static int mtk_rdma_attach(struct udevice *dev)
   if (ret < 0)
     return ret;
 
-  mmsys_plat = dev_get_uclass_plat(mmsys);
   mmsys_uc_priv = dev_get_uclass_priv(mmsys);
 
   clrbits_32(base + DISP_RDMA_SIZE_CON_0, DISP_RDMA_SIZE_CON_0_MATRIX_ENABLE);
@@ -81,10 +81,8 @@ static int mtk_rdma_attach(struct udevice *dev)
   clrbits_32(base + DISP_RDMA_MEM_CON, DISP_RDMA_MEM_CON_MODE_INPUT_FORMAT_MASK);
   clrbits_32(base + DISP_RDMA_MEM_CON, DISP_RDMA_MEM_CON_MODE_INPUT_SWAP);
 
-  writel(0 /*mmsys_plat->base*/, base + DISP_RDMA_MEM_START_ADDR);
-
-  writel(0, //mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix),
-          base + DISP_RDMA_MEM_SRC_PITCH);
+  writel(0, base + DISP_RDMA_MEM_START_ADDR);
+  writel(0, base + DISP_RDMA_MEM_SRC_PITCH);
   clrsetbits_32(base + DISP_RDMA_SIZE_CON_0, DISP_RDMA_SIZE_CON_0_OUTPUT_FRAME_WIDTH_MASK,
             mmsys_uc_priv->xsize << DISP_RDMA_SIZE_CON_0_OUTPUT_FRAME_WIDTH_OFFSET);
   clrsetbits_32(base + DISP_RDMA_SIZE_CON_1, DISP_RDMA_SIZE_CON_1_OUTPUT_FRAME_HEIGHT_MASK,
@@ -96,6 +94,8 @@ static int mtk_rdma_attach(struct udevice *dev)
                 DISP_RDMA_FIFO_CON_OUTPUT_VALID_FIFO_THRESHOLD_MASK,
                 ((mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix) * 125) / (16 * 1000)) << DISP_RDMA_FIFO_CON_OUTPUT_VALID_FIFO_THRESHOLD_OFFSET);
   setbits_32(base + DISP_RDMA_FIFO_CON, DISP_RDMA_FIFO_CON_UNDERFLOW_EN);
+  writel(0x1f, base + DISP_RDMA_INT_ENABLE);
+
   setbits_32(base + DISP_RDMA_GLOBAL_CON, DISP_RDMA_GLOBAL_CON_ENGINE_EN);
 
   return mtk_video_common_attach(dev);

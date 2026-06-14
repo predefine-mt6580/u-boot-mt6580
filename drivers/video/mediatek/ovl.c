@@ -6,8 +6,9 @@
 #include <linux/delay.h>
 #include "common.h"
 
-#define DISP_OVL_EN 0xC
+#define DISP_OVL_INTEN 0x0
 
+#define DISP_OVL_EN 0xC
 #define DISP_OVL_RST 0x14
 
 #define DISP_OVL_ROI_SIZE 0x20
@@ -18,6 +19,36 @@
 #define DISP_OVL_DATAPATH_CON_LAYER_SMI_ID_EN BIT(0)
 
 #define DISP_OVL_ROI_BGCLR 0x28
+#define DISP_OVL_SRC_CON 0x2C
+
+#define DISP_OVL_L0_CON 0x30
+#define DISP_OVL_L0_CON_CFMT_ARGB8888 3
+#define DISP_OVL_L0_CON_BTSW BIT(24)
+#define DISP_OVL_L0_CON_AEN BIT(8)
+
+#define DISP_OVL_L0_SRC_SIZE 0x38
+#define DISP_OVL_L0_OFFSET 0x3C
+#define DISP_OVL_L0_PITCH 0x44
+#define DISP_OVL_L0_ADDR 0xF40
+
+#define DISP_OVL_RDMA0_CTRL 0xC0
+#define DISP_OVL_RDMA0_MEM_GMC_SETTING 0xC8
+
+
+static void mtk_ovl_layer0_config(void __iomem *base, ulong fb_addr,
+                u32 width, u32 height, u32 pitch)
+{
+  u32 l0_con = (DISP_OVL_L0_CON_CFMT_ARGB8888 << 12) | DISP_OVL_L0_CON_BTSW | DISP_OVL_L0_CON_AEN;
+
+  writel(l0_con, base + DISP_OVL_L0_CON);
+  writel(0, base + DISP_OVL_L0_OFFSET);
+  writel((height << 16) | width, base + DISP_OVL_L0_SRC_SIZE);
+  writel(pitch, base + DISP_OVL_L0_PITCH);
+  writel(fb_addr, base + DISP_OVL_L0_ADDR);
+  writel(1, base + DISP_OVL_RDMA0_CTRL);
+  writel(0x6070, base + DISP_OVL_RDMA0_MEM_GMC_SETTING);
+  setbits_32(base + DISP_OVL_SRC_CON, BIT(0));
+}
 
 static int mtk_ovl_probe(struct udevice *dev)
 {
@@ -42,6 +73,7 @@ static int mtk_ovl_attach(struct udevice *dev)
   struct udevice *mmsys;
   struct video_uc_plat *mmsys_plat;
   struct video_priv *mmsys_uc_priv;
+  u32 pitch;
 
   base = dev_read_addr_ptr(dev);
   if (!base)
@@ -54,34 +86,32 @@ static int mtk_ovl_attach(struct udevice *dev)
   mmsys_plat = dev_get_uclass_plat(mmsys);
   mmsys_uc_priv = dev_get_uclass_priv(mmsys);
 
-  // reset ovl
+  if (!mmsys_plat->base)
+    return -EINVAL;
+
   setbits_32(base + DISP_OVL_RST, 1);
   clrbits_32(base + DISP_OVL_RST, 1);
-  mdelay(10); // TODO: remove?
+  mdelay(10);
 
-  //clrbits_32(base + DISP_RDMA_SIZE_CON_0, DISP_RDMA_SIZE_CON_0_MATRIX_ENABLE);
-  //writel(mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix),
-  //        base + DISP_RDMA_MEM_SRC_PITCH);
-
-
-  // configure ovl roi
   writel(mmsys_uc_priv->xsize << DISP_OVL_ROI_SIZE_W_OFFSET |
          mmsys_uc_priv->ysize << DISP_OVL_ROI_SIZE_H_OFFSET, base + DISP_OVL_ROI_SIZE);
-  writel(0xff00ffff, base + DISP_OVL_ROI_BGCLR);
-
-  // configure ovl layer 0
+  writel(0xff0000ff, base + DISP_OVL_ROI_BGCLR);
 
   ret = mtk_video_common_attach(dev);
   if (ret < 0)
     return ret;
 
-  // configure ovl
-  // seems useless without handling interrupts
-  //writel(0xE, base + DISP_OVL_INTEN);
+  writel(0xE, base + DISP_OVL_INTEN);
+
+  pitch = mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix);
+
+  mtk_ovl_layer0_config(base, mmsys_plat->base, mmsys_uc_priv->xsize,
+              mmsys_uc_priv->ysize, VNBYTES(mmsys_uc_priv->bpix));
+
   writel(1, base + DISP_OVL_EN);
   setbits_32(base + DISP_OVL_DATAPATH_CON, DISP_OVL_DATAPATH_CON_LAYER_SMI_ID_EN);
 
-  return 0;//mtk_video_common_attach(dev);
+  return 0;
 }
 
 static struct video_bridge_ops mtk_ovl_ops = {

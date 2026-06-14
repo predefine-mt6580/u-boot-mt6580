@@ -14,6 +14,9 @@
 #define DSI_START 0x00
 #define DSI_START_BIT BIT(0)
 
+#define DSI_COM_CTRL 0x10
+#define DSI_COM_CTRL_RESET BIT(0)
+
 #define DSI_INTSTA 0x0c
 #define DSI_INTSTA_BUSY BIT(31)
 #define DSI_INTSTA_FRAME_DONE BIT(4)
@@ -91,6 +94,14 @@ static int mtk_dsi_probe(struct udevice *dev)
   return 0;
 }
 
+static void mtk_dsi_reset(struct udevice *dev)
+{
+  struct mtk_dsi_priv *priv = dev_get_priv(dev);
+
+  setbits_32(priv->base + DSI_COM_CTRL, DSI_COM_CTRL_RESET);
+  clrbits_32(priv->base + DSI_COM_CTRL, DSI_COM_CTRL_RESET);
+}
+
 static void mtk_dsi_start(struct udevice *dev)
 {
   struct mtk_dsi_priv *priv = dev_get_priv(dev);
@@ -111,12 +122,10 @@ static void mtk_dsi_wait_int(struct udevice *dev, int flag)
 {
   struct mtk_dsi_priv *priv = dev_get_priv(dev);
 
-  if (readl(priv->base + DSI_INTSTA) & DSI_INTSTA_BUSY) {
-    while(!(readl(priv->base + DSI_INTSTA) & flag))
-      udelay(10);
+  while(!(readl(priv->base + DSI_INTSTA) & flag))
+    udelay(10);
 
-    clrbits_32(priv->base + DSI_INTSTA, flag);
-  }
+  setbits_32(priv->base + DSI_INTSTA, flag);
 }
 
 static ssize_t mtk_dsi_host_transfer(struct mipi_dsi_host *host,
@@ -136,7 +145,6 @@ static ssize_t mtk_dsi_host_transfer(struct mipi_dsi_host *host,
         (((char*)msg->tx_buf)[0] << 16) |
         (msg->type << 8),
         priv->base + DSI_CMDQ);
-      log_crit("CMDQ: %.8x\n", readl(priv->base + DSI_CMDQ));
       writel(1, priv->base + DSI_CMDQ_CON);
       mtk_dsi_start(dev);
       mtk_dsi_wait_int(dev, DSI_INTSTA_CMD_DONE);
@@ -173,8 +181,6 @@ static int mtk_dsi_get_phy_config(struct udevice *dev)
 
   ui = ALIGN(PSEC_PER_SEC, priv->phy_opts.hs_clk_rate);
   do_div(ui, priv->phy_opts.hs_clk_rate);
-
-  // DONT-PUSH: does this need for panel?
 
   priv->phy_opts.clk_trail = 96000;
   priv->phy_opts.clk_zero = 400000;
@@ -240,7 +246,7 @@ static int mtk_dsi_hw_init(struct udevice *dev)
 
   clrsetbits_32(priv->base + DSI_VACT_NL, 0xfff, priv->timings.vactive.typ & 0xfff);
   clrsetbits_32(priv->base + DSI_PSCTRL, 0x3fff,
-                (priv->timings.vactive.typ * priv->bpp) & 0x3fff);
+                (priv->timings.hactive.typ * priv->bpp) & 0x3fff);
   clrsetbits_32(priv->base + DSI_PSCTRL, 3 << 16,
                 ((3 - priv->device.format) & 3) << 16);
 
@@ -271,9 +277,9 @@ static int mtk_dsi_hw_init(struct udevice *dev)
 
     if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE) {
       clrsetbits_32(priv->base + DSI_HSA_WC, 0xfff,
-                  ALIGN(priv->timings.hsync_len.typ * priv->bpp - 10, 4) & 0xfff);
+                  ALIGN(priv->timings.hsync_len.typ * priv->bpp, 4) & 0xfff);
       clrsetbits_32(priv->base + DSI_HBP_WC, 0xfff,
-                  ALIGN(priv->timings.hback_porch.typ * priv->bpp - 10, 4) & 0xfff);
+                  ALIGN(priv->timings.hback_porch.typ * priv->bpp, 4) & 0xfff);
     } else {
       clrsetbits_32(priv->base + DSI_HSA_WC, 0xfff,
                   ALIGN(priv->timings.hsync_len.typ * priv->bpp - 4, 4) & 0xfff);
@@ -281,7 +287,7 @@ static int mtk_dsi_hw_init(struct udevice *dev)
                   ALIGN((priv->timings.hback_porch.typ + priv->timings.hsync_len.typ) * priv->bpp - 10, 4) & 0xfff);
     }
     clrsetbits_32(priv->base + DSI_HFP_WC, 0xfff,
-                ALIGN(priv->timings.hfront_porch.typ * priv->bpp - 12, 4) & 0xfff);
+                ALIGN(priv->timings.hfront_porch.typ * priv->bpp, 4) & 0xfff);
 
     // ???
     clrsetbits_32(priv->base + DSI_BLLP_WC, 0xfff, 0);
@@ -324,15 +330,18 @@ static int mtk_dsi_attach(struct udevice *dev)
   if (ret < 0)
     return ret;
 
+  mtk_dsi_reset(dev);
+
+  // switch to command mode
+  clrbits_32(priv->base + DSI_MODE_CON, 3);
+
   ret = mtk_dsi_hw_init(dev);
   if (ret < 0)
     return ret;
 
-  ret = mtk_video_common_attach(dev);
+  ret = panel_enable_backlight(priv->panel);
   if (ret < 0)
     return ret;
-
-  mtk_dsi_wait_int(dev, DSI_INTSTA_FRAME_DONE);
 
   if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE) {
     dsi_mode = 1;
@@ -342,6 +351,7 @@ static int mtk_dsi_attach(struct udevice *dev)
     dsi_mode = 2;
   }
 
+  // switch back to video mode
   clrsetbits_32(priv->base + DSI_MODE_CON, 3, dsi_mode & 3);
   setbits_32(priv->base + DSI_PHY_LCCON, DSI_PHY_LCCON_HSTX_EN);
 

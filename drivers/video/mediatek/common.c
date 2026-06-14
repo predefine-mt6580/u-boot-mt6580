@@ -88,11 +88,7 @@ int mtk_video_common_attach(struct udevice *dev)
   if (ret < 0 && ret != -ENOSYS)
     return ret;
 
-  #if CONFIG_IS_ENABLED(VIDEO_MTK_MUTEX)
   return mtk_video_common_setup_mutex(dev);
-  #else
-  return 0;
-  #endif
 }
 
 int mtk_video_common_get_display_timing(struct udevice *dev,

@@ -9,18 +9,21 @@
 int mtk_mutex_setup(struct udevice *dev, int mode, int mutex_id, int mutex_device)
 {
   void __iomem *base;
+  // u32 sof;
 
   base = dev_read_addr_ptr(dev);
   if (!base)
     return -EINVAL;
 
+  // sof = (mode == MUTEX_MODE_SINGLE) ? 0 : 1;
+
   writel(0, base + DISP_MUTEX_EN_OFFSET(mutex_id));
 
-  clrsetbits_32(base + DISP_MUTEX_MOD_OFFSET(mutex_id), 1, mode & 1);
-  setbits_32(base + DISP_MUTEX_SOF_OFFSET(mutex_id), 0x140); //BIT(mutex_device));
+  writel(/* mutex ops */ 0x2f140, base + DISP_MUTEX_MOD_OFFSET(mutex_id));
+  writel(/*sof*/ 1, base + DISP_MUTEX_SOF_OFFSET(mutex_id));
   writel(1, base + DISP_MUTEX_EN_OFFSET(mutex_id));
 
-  return -EINVAL;
+  return 0;
 }
 
 static int mtk_mutex_probe(struct udevice *dev)
