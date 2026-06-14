@@ -83,7 +83,7 @@ static int mtk_mmsys_probe(struct udevice *dev)
   uc_priv->rot = 0;
 
   uc_priv->bpix = VIDEO_BPP32;
-  uc_priv->format = VIDEO_X8R8G8B8;
+  uc_priv->format = VIDEO_RGBA8888;
   uc_priv->flush_dcache = true;
 
   plat->size = uc_priv->xsize * uc_priv->ysize * VNBYTES(uc_priv->bpix);

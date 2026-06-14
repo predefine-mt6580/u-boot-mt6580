@@ -93,7 +93,7 @@ static int mtk_ovl_attach(struct udevice *dev)
 
   writel(mmsys_uc_priv->xsize << DISP_OVL_ROI_SIZE_W_OFFSET |
          mmsys_uc_priv->ysize << DISP_OVL_ROI_SIZE_H_OFFSET, base + DISP_OVL_ROI_SIZE);
-  writel(0xff00ff00, base + DISP_OVL_ROI_BGCLR);
+  writel(0xff000000, base + DISP_OVL_ROI_BGCLR);
 
   ret = mtk_video_common_attach(dev);
   if (ret < 0)
@@ -103,7 +103,7 @@ static int mtk_ovl_attach(struct udevice *dev)
   pitch = mmsys_uc_priv->xsize * VNBYTES(mmsys_uc_priv->bpix);
 
   mtk_ovl_layer0_config(base, mmsys_plat->base, mmsys_uc_priv->xsize,
-              mmsys_uc_priv->ysize, VNBYTES(mmsys_uc_priv->bpix));
+              mmsys_uc_priv->ysize, pitch);
 
   writel(0xE, base + DISP_OVL_INTEN);
   writel(1, base + DISP_OVL_EN);
