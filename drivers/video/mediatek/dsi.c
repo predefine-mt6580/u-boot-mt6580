@@ -175,15 +175,17 @@ static int mtk_dsi_get_phy_config(struct udevice *dev)
     return ret;
 
   ret = phy_mipi_dphy_get_default_config(priv->timings.pixelclock.typ,
-                                          priv->bpp, priv->device.lanes, &priv->phy_opts);
+                                          priv->bpp * 8, priv->device.lanes, &priv->phy_opts);
   if (ret < 0)
     return ret;
 
   ui = ALIGN(PSEC_PER_SEC, priv->phy_opts.hs_clk_rate);
   do_div(ui, priv->phy_opts.hs_clk_rate);
 
-  priv->phy_opts.clk_trail = 96000;
+  priv->phy_opts.clk_trail = 96000 + 1;
   priv->phy_opts.clk_zero = 400000;
+  priv->phy_opts.clk_prepare = 64000;
+  priv->phy_opts.clk_post = 96000 + 52 * ui;
 
   priv->phy_opts.lpx = 80000;
   priv->phy_opts.ta_get = 5 * priv->phy_opts.lpx;
@@ -244,7 +246,6 @@ static int mtk_dsi_hw_init(struct udevice *dev)
   writel(lane_num_bits << 2, priv->base + DSI_TXRX_CTRL);
   writel(DSI_WMEM_CONTI, priv->base + DSI_MEM_CONTI);
 
-  clrsetbits_32(priv->base + DSI_VACT_NL, 0xfff, priv->timings.vactive.typ & 0xfff);
   clrsetbits_32(priv->base + DSI_PSCTRL, 0x3fff,
                 (priv->timings.hactive.typ * priv->bpp) & 0x3fff);
   clrsetbits_32(priv->base + DSI_PSCTRL, 3 << 16,
@@ -270,10 +271,11 @@ static int mtk_dsi_hw_init(struct udevice *dev)
          (priv->phy_opts.clk_prepare * hs_clk_rate_mhz / 8000000) << 0,
           priv->base + DSI_PHY_TIMCON3);
 
-  if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO) { 
+  if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO) {
     clrsetbits_32(priv->base + DSI_VSA_NL, 0xfff, priv->timings.vsync_len.typ & 0xfff);
     clrsetbits_32(priv->base + DSI_VBP_NL, 0xfff, priv->timings.vback_porch.typ & 0xfff);
     clrsetbits_32(priv->base + DSI_VFP_NL, 0xfff, priv->timings.vfront_porch.typ & 0xfff);
+    clrsetbits_32(priv->base + DSI_VACT_NL, 0xfff, priv->timings.vactive.typ & 0xfff);
 
     if (priv->device.mode_flags & MIPI_DSI_MODE_VIDEO_SYNC_PULSE) {
       clrsetbits_32(priv->base + DSI_HSA_WC, 0xfff,
