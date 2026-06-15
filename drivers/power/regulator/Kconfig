@@ -342,6 +342,12 @@ config REGULATOR_TPS65090
 	supported, but it is only possible to turn the regulators on or off.
 	There is no voltage/current control.
 
+config REGULATOR_MTK
+	bool "Enable driver for Mediatek regulators"
+	depends on DM_REGULATOR && MTK_PMIC
+	---help---
+	Enable support for the regulator functions of the MTK PMIC.
+
 config DM_REGULATOR_PALMAS
 	bool "Enable driver for PALMAS PMIC regulators"
        depends on PMIC_PALMAS

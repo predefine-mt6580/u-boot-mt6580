@@ -40,4 +40,8 @@ config QCOM_HYP_SMMU
 	  Say Y here to enable support for non-boot peripherals like USB by
 	  configuring identity mapped streams for them.
 
+config MEDIATEK_IOMMU
+  bool "Mediatek iommu support"
+  depends on IOMMU
+
 endmenu

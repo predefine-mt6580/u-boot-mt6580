@@ -1,0 +1,176 @@
+/dts-v1/;
+#include "mt6580.dtsi"
+#include "mt6350.dtsi"
+#include "skeleton.dtsi"
+
+/ {
+  model = "Prestigio Wize 3151";
+  compatible = "prestigio,pmt3151";
+
+  chosen {
+    tick-timer = &gpt;
+  };
+
+  memory {
+    #address-cells = <1>;
+    #size-cells = <1>;
+    device_type = "memory";
+
+    // using last 32 MB leads to crash(is it used by something else like trustzone?)
+    reg = <0x80000000 (0x40000000 - 0x2000000)>;
+  };
+};
+
+&uart0 {
+  status = "okay";
+};
+
+/*&uart1 {
+  status = "okay";
+};*/
+
+&pinctrl {
+  mmc0_pins_default: mmc0default {
+    mux {
+      function = "msdc";
+      groups =  "msdc0";
+    };
+
+    conf-cmd-data {
+      pins = "MSDC0_CMD", "MSDC0_DAT0", "MSDC0_DAT1",
+             "MSDC0_DAT2", "MSDC0_DAT3", "MSDC0_DAT4",
+             "MSDC0_DAT5", "MSDC0_DAT6", "MSDC0_DAT7";
+      input-enable;
+      bias-pull-up;
+    };
+
+    conf-clk {
+      pins = "MSDC0_CLK";
+      bias-pull-down;
+    };
+
+    conf-rst {
+      pins = "MSDC0_RSTB";
+      bias-pull-up;
+    };
+  };
+
+  mmc1_pins_default: mmc1default {
+    mux {
+      function = "msdc";
+      groups =  "msdc1";
+    };
+
+    conf-cmd-data {
+      pins = "MSDC1_DAT0", "MSDC1_DAT1", "MSDC1_DAT2",
+             "MSDC1_DAT3", "MSDC1_CMD";
+      input-enable;
+      drive-strength = <2>;
+      bias-pull-up;
+    };
+
+    conf-clk {
+      pins = "MSDC1_CLK";
+      drive-strength = <2>;
+      bias-pull-down;
+    };
+
+    conf-ins {
+      pins = "EINT1";
+      output-enable;
+      output-high;
+    };
+  };
+};
+
+&mmc0 {
+  pinctrl-names = "default";
+  pinctrl-0 = <&mmc0_pins_default>;
+  bus-width = <8>;
+  max-frequency = <208000000>;
+  cap-mmc-highspeed;
+  mmc-ddr-1_8v;
+  mmc-hs200-1_8v;
+  vmmc-supply = <&mt6350_vemc3v3_reg>;
+  vqmmc-supply = <&mt6350_vio18_reg>;
+  non-removable;
+  status = "okay";
+};
+
+&mmc1 {
+  pinctrl-names = "default";
+  pinctrl-0 = <&mmc1_pins_default>;
+  bus-width = <4>;
+  max-frequency = <208000000>;
+  cap-sd-highspeed;
+  sd-uhs-ddr50;
+  sd-uhs-sdr104;
+  sd-uhs-sdr12;
+  sd-uhs-sdr25;
+  sd-uhs-sdr50;
+  vmmc-supply = <&mt6350_vmch_reg>;
+  vqmmc-supply = <&mt6350_vmc_reg>;
+  cd-gpios = <&gpio 17 GPIO_ACTIVE_LOW>;
+  status = "okay";
+};
+
+// DISPLAY
+&mmsys {
+  // ovl0 -> color0 -> internal
+  // internal -> dither0 -> rdma0 -> dsi0
+  // internal: color0 -> aal0 -> gamma0 -> dither0
+
+  mediatek,path = <DISP_PATH(OVL0_MOUT,   COLOR0)>, // ovl -> color0
+                  <DISP_PATH(COLOR0_IN,   OVL0)>,   //
+                  <DISP_PATH(DITHER_MOUT, RDMA0)>,  // dither -> rdma
+                  <DISP_PATH(RDMA0_OUT,   DSI0)>,   // rdma -> dsi0
+                  <DISP_PATH(DSI0_IN,     RDMA0)>;  //
+};
+
+// mmsys_display_0 -> ovl0_in
+&mmsys_display_0 {
+  remote-endpoint = <&ovl0_in>;
+};
+&ovl0_in {
+  remote-endpoint = <&mmsys_display_0>;
+};
+
+// ovl0_out -> rdma0_in
+&ovl0_out {
+  remote-endpoint = <&rdma0_in>;
+};
+&rdma0_in {
+  remote-endpoint = <&ovl0_out>;
+};
+
+// rdma0_out -> dsi0_in
+&rdma0_out {
+  remote-endpoint = <&dsi0_in>;
+};
+&dsi0_in {
+  remote-endpoint = <&rdma0_out>;
+};
+
+// dsi0_out -> panel_in
+&dsi0_out {
+  remote-endpoint = <&panel_in>;
+};
+
+/ {
+  panel: panel {
+    compatible = "k710_hz_jd9366_boe_wxga_ips_101";
+
+    enable-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>, // controller(ENN)
+                   <&gpio 11 GPIO_ACTIVE_HIGH>; // panel(ENP)
+
+    reset-gpios = <&gpio 70 GPIO_ACTIVE_HIGH>;
+
+    power-supply = <&mt6350_vgp3_reg>;
+
+    port {
+      panel_in: endpoint {
+        remote-endpoint = <&dsi0_out>;
+      };
+    };
+  };
+};

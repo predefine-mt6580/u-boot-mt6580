@@ -303,6 +303,11 @@ config SIMPLE_PANEL
 	  This turns on a simple panel driver that enables a compatible
 	  video panel.
 
+config PANEL_K710_HZ_JD9366_BOE_WXGA_IPS_101
+  tristate "k710 hz jd9366 boe WXGA IPS 10'1 1280x800 DSI video mode panel"
+  depends on PANEL && BACKLIGHT
+  select VIDEO_MIPI_DSI
+
 config PANEL_HX8238D
 	bool "Enable Himax HX-8238D LCD driver"
 	depends on PANEL
@@ -918,6 +923,8 @@ source "drivers/video/bridge/Kconfig"
 source "drivers/video/tegra/Kconfig"
 
 source "drivers/video/imx/Kconfig"
+
+source "drivers/video/mediatek/Kconfig"
 
 config VIDEO_MXS
 	bool "Enable video support on i.MX28/i.MX6UL/i.MX7 SoCs"

@@ -1,0 +1,55 @@
+#ifndef _DT_BINDINGS_CLK_MT6580_H
+#define _DT_BINDINGS_CLK_MT6580_H
+
+#define CLK_XTAL 0
+
+#define CLK_APMIXED_ARMPLL 0
+#define CLK_APMIXED_MAINPLL 1
+#define CLK_APMIXED_UNIVPLL 2
+#define CLK_APMIXED_MCUPLL 3
+#define CLK_APMIXED_WHPLL 4
+#define CLK_APMIXED_WPLL 5
+
+#define CLK_TOP_13M 0
+
+#define CLK_TOP_MPLL 1
+#define CLK_TOP_MPLL_D6 2
+#define CLK_TOP_MPLL_D7 3
+#define CLK_TOP_MPLL_D8 4
+#define CLK_TOP_MPLL_D10 5
+#define CLK_TOP_MPLL_D12 6
+#define CLK_TOP_UPLL 7
+#define CLK_TOP_UPLL_D6 8
+#define CLK_TOP_UPLL_D7 9
+#define CLK_TOP_UPLL_D12 10
+#define CLK_TOP_UPLL_D24 11
+
+/* Muxes */
+#define CLK_TOP_UART0_SEL 12
+#define CLK_TOP_MSDC0_SEL 13
+#define CLK_TOP_UART1_SEL 14
+#define CLK_TOP_MSDC1_SEL 16
+#define CLK_TOP_MMSYS_PWM_SEL 17
+
+/* Gates */
+#define CLK_TOP_MMSYS_PWM 0
+#define CLK_TOP_I2C0 1
+#define CLK_TOP_I2C1 2
+#define CLK_TOP_UART0 3
+#define CLK_TOP_UART1 4
+#define CLK_TOP_I2C2 5
+#define CLK_TOP_MSDC0 6
+#define CLK_TOP_MSDC1 7
+#define CLK_TOP_APXGPT 8
+
+#define CLK_MMSYS_SMI_COMMON 0
+#define CLK_MMSYS_SMI_LARB0 1
+#define CLK_MMSYS_OVL0 2
+#define CLK_MMSYS_RDMA0 3
+#define CLK_MMSYS_PWM_MM 4
+#define CLK_MMSYS_PWM_26M 5
+#define CLK_MMSYS_DSI_ENGINE 6
+#define CLK_MMSYS_DSI_DIGITAL 7
+
+#endif /* _DT_BINDINGS_CLK_MT6580_H */
+/* Clocks */
