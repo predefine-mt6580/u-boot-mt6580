@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #include <dm.h>
 #include <power/pmic.h>
 #include <power/mtk_pmic.h>

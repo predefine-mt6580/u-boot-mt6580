@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2026 Pavel Ivanov <predefine@yandex.ru>
+ */
+
 #ifndef __DT_BINDINGS_VIDEO_MTK_H__
 #define __DT_BINDINGS_VIDEO_MTK_H__
 

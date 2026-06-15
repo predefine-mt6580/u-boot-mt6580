@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #ifndef __MTK_PMIC_H__
 #define __MTK_PMIC_H__
 

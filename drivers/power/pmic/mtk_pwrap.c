@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #include <asm/io.h>
 #include <errno.h>
 #include <dm.h>

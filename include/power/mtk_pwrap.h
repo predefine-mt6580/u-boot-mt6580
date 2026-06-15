@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #ifndef __MTK_PWRAP_H_
 #define __MTK_PWRAP_H_
 

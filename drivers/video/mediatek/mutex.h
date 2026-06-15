@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2026 Pavel Ivanov <predefine@yandex.ru>
+ */
+
 #ifndef _MTK_VIDEO_MUTEX_H_
 #define _MTK_VIDEO_MUTEX_H_
 

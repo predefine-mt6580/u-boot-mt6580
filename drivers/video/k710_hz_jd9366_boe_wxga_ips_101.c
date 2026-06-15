@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0+
+
 #include <dm.h>
 #include <backlight.h>
 #include <mipi_dsi.h>

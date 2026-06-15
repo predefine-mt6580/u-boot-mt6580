@@ -1,3 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0+
+/*
+ * Copyright (C) 2026 Pavel Ivanov <predefine@yandex.ru>
+ */
+
 #include <dm.h>
 #include <generic-phy.h>
 #include <phy-mipi-dphy.h>

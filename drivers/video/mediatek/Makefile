@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0+
+#
+# Copyright (C) 2026 Pavel Ivanov <predefine@yandex.ru>
+
 ifdef CONFIG_VIDEO_MTK
 obj-y += common.o
 obj-$(CONFIG_VIDEO_MTK_DSI) += dsi.o

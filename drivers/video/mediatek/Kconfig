@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0+
+#
+# Copyright (C) 2026 Pavel Ivanov <predefine@yandex.ru>
+
 menuconfig VIDEO_MTK
 	bool "Enable Mediatek Video Support"
 	depends on VIDEO && VIDEO_BRIDGE && PANEL
