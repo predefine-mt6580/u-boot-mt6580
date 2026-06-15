@@ -6,13 +6,13 @@ static int mediatek_smi_larb_probe(struct udevice *dev)
   int err;
   struct clk_bulk clks;
 
-	err = clk_get_bulk(dev, &clks);
-	if (!err)
-  {
-  	err = clk_enable_bulk(&clks);
-  	if (err)
-	  	return err;
-  }
+  err = clk_get_bulk(dev, &clks);
+  if (err)
+    return 0;
+
+  err = clk_enable_bulk(&clks);
+  if (err)
+    return err;
 
   return 0;
 }

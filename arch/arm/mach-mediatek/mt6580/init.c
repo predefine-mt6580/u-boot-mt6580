@@ -3,9 +3,6 @@
 #include <fdtdec.h>
 #include <stdio.h>
 #include <asm/global_data.h>
-// #include <asm/system.h>
-// #include <linux/kernel.h>
-// #include <linux/sizes.h>
 
 #include "../cpu.h"
 
