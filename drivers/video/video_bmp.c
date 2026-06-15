@@ -36,9 +36,9 @@ static uint get_bmp_col_16bpp(struct bmp_color_table_entry cte)
  */
 static u32 get_bmp_col_x2r10g10b10(struct bmp_color_table_entry *cte)
 {
-	return ((cte->red << 22U) |
-		(cte->green << 12U) |
-		(cte->blue << 2U));
+	return ((cte->red << 20U) |
+		(cte->green << 10U) |
+		cte->blue);
 }
 
 /**
@@ -48,9 +48,9 @@ static u32 get_bmp_col_x2r10g10b10(struct bmp_color_table_entry *cte)
  */
 static u32 get_bmp_col_rgba8888(struct bmp_color_table_entry *cte)
 {
-	return ((cte->red) |
-		(cte->green << 8U) |
-		(cte->blue << 16U) | 0xff << 24U);
+	return ((cte->red << 24U) |
+		(cte->green << 16U) |
+		(cte->blue << 8U) | 0xff);
 }
 
 /**
