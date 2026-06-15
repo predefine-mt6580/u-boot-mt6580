@@ -160,12 +160,14 @@
   panel: panel {
     compatible = "k710_hz_jd9366_boe_wxga_ips_101";
 
-    enable-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>, // controller(ENN)
-                   <&gpio 11 GPIO_ACTIVE_HIGH>; // panel(ENP)
+    enable-gpios = <&gpio 12 GPIO_ACTIVE_HIGH>, // negative(ENN)
+                   <&gpio 11 GPIO_ACTIVE_HIGH>; // positive(ENP)
 
     reset-gpios = <&gpio 70 GPIO_ACTIVE_HIGH>;
 
     power-supply = <&mt6350_vgp3_reg>;
+
+    backlight = <&display_pwm>;
 
     port {
       panel_in: endpoint {

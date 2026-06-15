@@ -174,17 +174,13 @@
       #clock-cells = <1>;
     };
 
-    display_pwm: led@1100f000 {
-      compatible = "mediatek,display-pwm";
+    display_pwm: led-controller@1100f000 {
+      compatible = "mediatek,mt6580-display-pwm";
       reg = <0x1100f000 0x1000>;
       clocks =  <&topckgen_cg CLK_TOP_MMSYS_PWM>,
                 <&mmsys_cg CLK_MMSYS_PWM_MM>,
                 <&mmsys_cg CLK_MMSYS_PWM_26M>;
-      label = "backlight";
-      linux,default_trigger = "backlight";
-      period = <1023>;
-      level = <1023>;
-      default-state = "on";
+      levels = <0x3ff>; // 1024 levels
     };
 
     iommu: iommu@10203000 {

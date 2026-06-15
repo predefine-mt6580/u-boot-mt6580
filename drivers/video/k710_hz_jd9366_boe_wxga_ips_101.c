@@ -1,4 +1,5 @@
 #include <dm.h>
+#include <backlight.h>
 #include <mipi_dsi.h>
 #include <panel.h>
 #include <power/regulator.h>
@@ -6,6 +7,8 @@
 #include <linux/delay.h>
 
 struct k710_hz_jd9366_boe_wxga_ips_101_priv {
+  struct udevice *backlight;
+
   struct udevice *power;
 
   struct gpio_desc gpio_enn;
@@ -14,21 +17,35 @@ struct k710_hz_jd9366_boe_wxga_ips_101_priv {
 };
 
 static struct display_timing default_timing = {
-    .pixelclock.typ   = 70000000,
-    .hactive.typ      = 800,
-    .hfront_porch.typ = 18,
-    .hback_porch.typ  = 18,
-    .hsync_len.typ    = 18,
-    .vactive.typ      = 1280,
-    .vfront_porch.typ = 24,
-    .vback_porch.typ  = 8,
-    .vsync_len.typ    = 4,
+  .pixelclock.typ   = 70000000,
+  .hactive.typ      = 800,
+  .hfront_porch.typ = 18,
+  .hback_porch.typ  = 18,
+  .hsync_len.typ    = 18,
+  .vactive.typ      = 1280,
+  .vfront_porch.typ = 24,
+  .vback_porch.typ  = 8,
+  .vsync_len.typ    = 4,
 };
 
 static void dcs_write_one(struct mipi_dsi_device *dsi, u8 cmd, u8 data)
 {
-    mipi_dsi_dcs_write(dsi, cmd, &data, 1);
-    mdelay(1);
+  mipi_dsi_dcs_write(dsi, cmd, &data, 1);
+  mdelay(1);
+}
+
+static int k710_hz_jd9366_boe_wxga_ips_101_set_backlight(struct udevice *dev, int percent)
+{
+  struct k710_hz_jd9366_boe_wxga_ips_101_priv *priv = dev_get_priv(dev);
+  int ret;
+
+  ret = backlight_enable(priv->backlight);
+  if (ret)
+    return ret;
+
+  mdelay(5);
+
+  return backlight_set_brightness(priv->backlight, percent);
 }
 
 static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
@@ -209,35 +226,34 @@ static int k710_hz_jd9366_boe_wxga_ips_101_enable_backlight(struct udevice *dev)
 
   ret = mipi_dsi_dcs_exit_sleep_mode(dsi);
   if (ret)
-      return ret;
+    return ret;
 
   mdelay(120);
 
   ret = mipi_dsi_dcs_set_display_on(dsi);
   if (ret)
-      return ret;
+    return ret;
 
   mdelay(20);
   mdelay(100);
   ret = dm_gpio_set_value(&priv->gpio_enp, 1);
-    if (ret)
+  if (ret)
     return ret;
 
-
-  return 0;
+  return panel_set_backlight(dev, BACKLIGHT_DEFAULT);
 }
 
 static int k710_hz_jd9366_boe_wxga_ips_101_timings(struct udevice *dev,
-                                            struct display_timing *timing)
+                                                   struct display_timing *timing)
 {
   memcpy(timing, &default_timing, sizeof(*timing));
   return 0;
 }
 
 static const struct panel_ops k710_hz_jd9366_boe_wxga_ips_101_ops = {
-    .enable_backlight	= k710_hz_jd9366_boe_wxga_ips_101_enable_backlight,
-    //.set_backlight		= k710_hz_jd9366_boe_wxga_ips_101_set_backlight,
-    .get_display_timing	= k710_hz_jd9366_boe_wxga_ips_101_timings,
+  .enable_backlight   = k710_hz_jd9366_boe_wxga_ips_101_enable_backlight,
+  .set_backlight      = k710_hz_jd9366_boe_wxga_ips_101_set_backlight,
+  .get_display_timing = k710_hz_jd9366_boe_wxga_ips_101_timings,
 };
 
 static int k710_hz_jd9366_boe_wxga_ips_101_hw_init(struct udevice *dev)
@@ -291,22 +307,27 @@ static int k710_hz_jd9366_boe_wxga_ips_101_of_to_plat(struct udevice *dev)
   struct k710_hz_jd9366_boe_wxga_ips_101_priv *priv = dev_get_priv(dev);
   int ret;
 
+  ret = uclass_get_device_by_phandle(UCLASS_PANEL_BACKLIGHT, dev,
+                                     "backlight", &priv->backlight);
+  if (ret)
+    return ret;
+
   ret = device_get_supply_regulator(dev, "power-supply", &priv->power);
   if (ret)
     return ret;
 
   ret = gpio_request_by_name(dev, "enable-gpios", 0,
-                  &priv->gpio_enn, GPIOD_IS_OUT);
+                             &priv->gpio_enn, GPIOD_IS_OUT);
   if (ret)
     return ret;
 
   ret = gpio_request_by_name(dev, "enable-gpios", 1,
-                  &priv->gpio_enp, GPIOD_IS_OUT);
+                             &priv->gpio_enp, GPIOD_IS_OUT);
   if (ret)
     return ret;
 
   ret = gpio_request_by_name(dev, "reset-gpios", 0,
-                  &priv->gpio_rst, GPIOD_IS_OUT);
+                             &priv->gpio_rst, GPIOD_IS_OUT);
   if (ret)
     return ret;
 

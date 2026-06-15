@@ -25,4 +25,8 @@ config VIDEO_MTK_RDMA
 	bool "Mediatek RDMA"
 	depends on VIDEO_MTK
 
+config VIDEO_MTK_DISPLAY_PWM
+	bool "Mediatek Display PWM"
+	depends on VIDEO_MTK
+
 endif
