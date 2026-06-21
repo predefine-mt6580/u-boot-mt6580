@@ -3,14 +3,18 @@
 /dts-v1/;
 #include "mt6580.dtsi"
 #include "mt6350.dtsi"
-#include "skeleton.dtsi"
 
 / {
   model = "Prestigio Wize 3151";
   compatible = "prestigio,pmt3151";
 
+  aliases {
+    serial0 = &uart0;
+  };
+
   chosen {
     tick-timer = &gpt;
+    stdout-path = "serial0:115200n8";
   };
 
   memory {
@@ -96,7 +100,7 @@
   vmmc-supply = <&mt6350_vemc3v3_reg>;
   vqmmc-supply = <&mt6350_vio18_reg>;
   non-removable;
-  status = "okay";
+  // status = "okay";
 };
 
 &mmc1 {
@@ -116,7 +120,75 @@
   status = "okay";
 };
 
-// DISPLAY
+&mt6350_vemc3v3_reg {
+  bootph-all;
+};
+
+&mt6350_vio18_reg {
+  bootph-all;
+};
+
+&mt6350_vmch_reg {
+  bootph-all;
+};
+
+&mt6350_vmc_reg {
+  bootph-all;
+};
+
+&dramc {
+  emi_cona = <0x00025052>;
+  actim =    <0x44584494>;
+  gddr3ctl = <0x01000001>;
+  conf1 =    <0xF0048683>;
+  ddr2ctl =  <0xA00631D1>;
+  test2_1 =  <0x55000000>;
+  test2_3 =  <0xBF080401>;
+  conf2 =    <0x01806C3F>;
+  pd_ctrl =  <0xD1642342>;
+  actim1 =   <0x11000510>;
+  misctl0 =  <0x07800000>;
+  actim05t = <0x04002600>;
+  modereg1 =  <0x00C30001>;
+  modereg2 =  <0x00060002>;
+  modereg10 = <0x00FF000A>;
+  modereg63 = <0x0000003F>;
+
+  rkXcoarse = <15>;
+  rkXfine = <64>;
+
+  ucsum = <2>;
+  ucbest_step = <7>;
+
+  rk0_dqidly1 = <0x7010501>;
+  rk0_dqidly2 = <0x3040400>;
+  rk0_dqidly3 = <0x4020300>;
+  rk0_dqidly4 = <0x2010301>;
+  rk0_dqidly5 = <0x2030400>;
+  rk0_dqidly6 = <0x7040200>;
+  rk0_dqidly7 = <0x3000603>;
+  rk0_dqidly8 = <0x4030404>;
+  rk0_r0deldly = <0x292C272E>;
+
+  rk1_dqidly1 = <0x7020401>;
+  rk1_dqidly2 = <0x3040300>;
+  rk1_dqidly3 = <0x4030400>;
+  rk1_dqidly4 = <0x2010401>;
+  rk1_dqidly5 = <0x2020300>;
+  rk1_dqidly6 = <0x7030100>;
+  rk1_dqidly7 = <0x4000703>;
+  rk1_dqidly8 = <0x6030505>;
+  rk1_r0deldly = <0x2B2D282F>;
+
+  dqodly1 = <0>;
+  dqodly2 = <0>;
+  dqodly3 = <0>;
+  dqodly4 = <0>;
+  padctl2 = <0>;
+  padctl3 = <0>;
+};
+
+//DISPLAY
 &mmsys {
   // ovl0 -> color0 -> internal
   // internal -> dither0 -> rdma0 -> dsi0

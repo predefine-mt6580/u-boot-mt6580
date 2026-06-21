@@ -49,6 +49,7 @@
       clock-frequency = <32768>;
       #clock-cells = <0>;
       clock-output-names = "rtc32k";
+      bootph-all;
     };
   };
 
@@ -58,243 +59,257 @@
     status = "okay";
   };
 
-  soc {
-    #address-cells = <1>;
-    #size-cells = <1>;
-    compatible = "simple-bus";
-    ranges;
+  apmixedsys: clock-controller@10018000 {
+    compatible = "mediatek,mt6580-apmixedsys";
+    reg = <0x10018000 0x1000>;
+    #clock-cells = <1>;
+    bootph-all;
+  };
 
-    apmixedsys: clock-controller@10018000 {
-      compatible = "mediatek,mt6580-apmixedsys";
-      reg = <0x10018000 0x1000>;
-      #clock-cells = <1>;
+  topckgen: clock-controller@10000000 {
+    compatible = "mediatek,mt6580-topckgen";
+    reg = <0x10000000 0x1000>;
+    #clock-cells = <1>;
+    bootph-all;
+  };
+
+  topckgen_cg: clock-controller-cg@10000000 {
+    compatible = "mediatek,mt6580-topckgen-cg";
+    reg = <0x10000000 0x1000>;
+    #clock-cells = <1>;
+    bootph-all;
+  };
+
+  pwrap: pwrap {
+    compatible = "mediatek,mt6580-pwrap";
+    reg = <0x1000f000 0x1000>;
+    bootph-all;
+  };
+
+  wdt: watchdog@10007000 {
+    compatible = "mediatek,wdt";
+    reg = <0x10007000 0x100>;
+    timeout-sec = <15>;
+    interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_LOW>;
+  };
+
+  gpt: timer@10008000 {
+    compatible = "mediatek,timer";
+    reg = <0x10008000 0x80>;
+    interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_LOW>;
+    clocks = <&topckgen_cg CLK_TOP_APXGPT>, <&rtc32k>;
+    bootph-all;
+  };
+
+  gic: interrupt-controller@10210000 {
+    compatible = "arm,cortex-a7-gic";
+    interrupt-controller;
+    #interrupt-cells = <3>;
+    interrupt-parent = <&gic>;
+    reg = <0x10211000 0x1000>,
+          <0x10212000 0x2000>,
+          <0x10214000 0x2000>,
+          <0x10216000 0x2000>;
+  };
+
+  pinctrl: pinctrl@10005000 {
+    compatible = "mediatek,mt6580-pinctrl";
+    reg = <0x10005000 0x1000>,
+          <0x10014000 0x1000>,
+          <0x10015000 0x1000>,
+          <0x10016000 0x1000>,
+          <0x10017000 0x1000>;
+    reg-names = "gpio", "iocfg_t",
+                "iocfg_b", "iocfg_l", "iocfg_r";
+
+    bootph-all;
+    gpio: gpio-controller {
+      gpio-controller;
+      #gpio-cells = <2>;
+      bootph-all;
     };
+  };
 
-    topckgen: clock-controller@10000000 {
-      compatible = "mediatek,mt6580-topckgen";
-      reg = <0x10000000 0x1000>;
-      #clock-cells = <1>;
-    };
+  uart0: serial@11005000 {
+    compatible = "mediatek,mt6577-uart";
+    reg = <0x11005000 0x400>;
+    reg-shift = <2>;
+    interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_LOW>;
+    clocks =  <&topckgen CLK_TOP_UART0_SEL>,
+              <&topckgen_cg CLK_TOP_UART0>;
+    clock-names = "baud", "bus";
+    status = "disabled";
 
-    topckgen_cg: clock-controller-cg@10000000 {
-      compatible = "mediatek,mt6580-topckgen-cg";
-      reg = <0x10000000 0x1000>;
-      #clock-cells = <1>;
-    };
+    bootph-all;
+  };
 
-    pwrap: pwrap {
-      compatible = "mediatek,mt6580-pwrap";
-      reg = <0x1000f000 0x1000>;
-    };
+  uart1: serial@11006000 {
+    compatible = "mediatek,mt6577-uart";
+    reg = <0x11006000 0x400>;
+    reg-shift = <2>;
+    interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_LOW>;
+    clocks =  <&topckgen CLK_TOP_UART1_SEL>,
+              <&topckgen_cg CLK_TOP_UART1>;
+    clock-names = "baud", "bus";
+    status = "disabled";
+  };
 
-    wdt: watchdog@10007000 {
-      compatible = "mediatek,wdt";
-      reg = <0x10007000 0x100>;
-      timeout-sec = <15>;
-      interrupts = <GIC_SPI 157 IRQ_TYPE_LEVEL_LOW>;
-    };
+  mmc0: mmc@11120000 {
+    compatible = "mediatek,mt7623-mmc";
+    reg = <0x11120000 0x10000>;
+    interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
+    clocks = <&topckgen_cg CLK_TOP_MSDC0>,
+              <&topckgen CLK_TOP_MSDC0_SEL>;
+    clock-names = "source", "hclk";
+    status = "disabled";
+    bootph-all;
+  };
 
-    gpt: timer@10008000 {
-      compatible = "mediatek,timer";
-      reg = <0x10008000 0x80>;
-      interrupts = <GIC_SPI 92 IRQ_TYPE_LEVEL_LOW>;
-      clocks = <&topckgen_cg CLK_TOP_APXGPT>, <&rtc32k>;
-    };
+  mmc1: mmc@11130000 {
+    compatible = "mediatek,mt7623-mmc";
+    reg = <0x11130000 0x10000>;
+    interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
+    clocks = <&topckgen_cg CLK_TOP_MSDC1>,
+              <&topckgen CLK_TOP_MSDC1_SEL>;
+    clock-names = "source", "hclk";
+    status = "disabled";
+    bootph-all;
+  };
 
-    gic: interrupt-controller@10210000 {
-      compatible = "arm,cortex-a7-gic";
-      interrupt-controller;
-      #interrupt-cells = <3>;
-      interrupt-parent = <&gic>;
-      reg = <0x10211000 0x1000>,
-            <0x10212000 0x2000>,
-            <0x10214000 0x2000>,
-            <0x10216000 0x2000>;
-    };
+  dramc: dramc@10205000 {
+    compatible = "mediatek,mt6580-dramc";
+    reg = <0x10205000 0x1000>, // EMI
+          <0x10208000 0x1000>, // DDRPHY
+          <0x10207000 0x1000>, // DRAMC_AO
+          <0x10206000 0x1000>; // DRAMC_NAO
+    max-size = <0x80000000>; // 2GB
+    bootph-all;
+  };
 
-    pinctrl: pinctrl@10005000 {
-      compatible = "mediatek,mt6580-pinctrl";
-      reg = <0x10005000 0x1000>,
-            <0x10014000 0x1000>,
-            <0x10015000 0x1000>,
-            <0x10016000 0x1000>,
-            <0x10017000 0x1000>;
-      reg-names = "gpio", "iocfg_t",
-                  "iocfg_b", "iocfg_l", "iocfg_r";
+  mmsys_cg: clock-controller@14000000 {
+    compatible = "mediatek,mt6580-mmsys-cg";
+    reg = <0x14000000 0x1000>;
+    #clock-cells = <1>;
+  };
 
-      gpio: gpio-controller {
-        gpio-controller;
-        #gpio-cells = <2>;
+  display_pwm: led-controller@1100f000 {
+    compatible = "mediatek,mt6580-display-pwm";
+    reg = <0x1100f000 0x1000>;
+    clocks =  <&topckgen_cg CLK_TOP_MMSYS_PWM>,
+              <&mmsys_cg CLK_MMSYS_PWM_MM>,
+              <&mmsys_cg CLK_MMSYS_PWM_26M>;
+    levels = <0x3ff>; // 1024 levels
+  };
+
+  iommu: iommu@10203000 {
+    #iommu-cells = <1>;
+    reg = <0x10203000 0x1000>;
+    compatible = "mediatek,mt6580-m4u", "mediatek,m4u";
+    // mt6580 dont have cg for m4u
+    // clocks = <&sys26m>;
+    mediatek,larbs = <&larb0>;
+  };
+
+  larb0: larb@14016000 {
+    reg = <0x14016000 0x1000>;
+    compatible = "mediatek,mt6580-smi-larb", "mediatek,smi-larb";
+    clocks = <&mmsys_cg CLK_MMSYS_SMI_LARB0>;
+  };
+
+  mmsys: syscon@14000000 {
+    compatible = "mediatek,mt6580-mmsys";
+    reg = <0x14000000 0x1000>;
+    ports {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      port@0 {
+        reg = <0>;
+        mmsys_display_0: endpoint {};
       };
     };
+  };
 
-    uart0: serial@11005000 {
-      compatible = "mediatek,mt6577-uart";
-      reg = <0x11005000 0x400>;
-      reg-shift = <2>;
-      interrupts = <GIC_SPI 44 IRQ_TYPE_LEVEL_LOW>;
-      clocks =  <&topckgen CLK_TOP_UART0_SEL>,
-                <&topckgen_cg CLK_TOP_UART0>;
-      clock-names = "baud", "bus";
-      status = "disabled";
-    };
+  mutex: mutex@14015000 {
+    compatible = "mediatek,mt6580-disp-mutex";
+    reg = <0x14015000 0x1000>;
+    #mutex-cells = <2>;
+  };
 
-    uart1: serial@11006000 {
-      compatible = "mediatek,mt6577-uart";
-      reg = <0x11006000 0x400>;
-      reg-shift = <2>;
-      interrupts = <GIC_SPI 45 IRQ_TYPE_LEVEL_LOW>;
-      clocks =  <&topckgen CLK_TOP_UART1_SEL>,
-                <&topckgen_cg CLK_TOP_UART1>;
-      clock-names = "baud", "bus";
-      status = "disabled";
-    };
+  ovl0: ovl@14007000 {
+    compatible = "mediatek,mt6580-disp-ovl";
+    reg = <0x14007000 0x1000>;
+    clocks = <&mmsys_cg CLK_MMSYS_OVL0>;
+    iommus = <&iommu M4U_PORT_DISP_OVL0>;
+    mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_OVL0>;
 
-    mmc0: mmc@11120000 {
-      compatible = "mediatek,mt7623-mmc";
-      reg = <0x11120000 0x10000>;
-      interrupts = <GIC_SPI 38 IRQ_TYPE_LEVEL_LOW>;
-      clocks = <&topckgen_cg CLK_TOP_MSDC0>,
-               <&topckgen CLK_TOP_MSDC0_SEL>;
-      clock-names = "source", "hclk";
-      status = "disabled";
-    };
+    ports {
+      #address-cells = <1>;
+      #size-cells = <0>;
 
-    mmc1: mmc@11130000 {
-      compatible = "mediatek,mt7623-mmc";
-      reg = <0x11130000 0x10000>;
-      interrupts = <GIC_SPI 39 IRQ_TYPE_LEVEL_LOW>;
-      clocks = <&topckgen_cg CLK_TOP_MSDC1>,
-               <&topckgen CLK_TOP_MSDC1_SEL>;
-      clock-names = "source", "hclk";
-      status = "disabled";
-    };
+      port@0 {
+        reg = <0>;
+        ovl0_in: endpoint {};
+      };
 
-    mmsys_cg: clock-controller@14000000 {
-      compatible = "mediatek,mt6580-mmsys-cg";
-      reg = <0x14000000 0x1000>;
-      #clock-cells = <1>;
-    };
-
-    display_pwm: led-controller@1100f000 {
-      compatible = "mediatek,mt6580-display-pwm";
-      reg = <0x1100f000 0x1000>;
-      clocks =  <&topckgen_cg CLK_TOP_MMSYS_PWM>,
-                <&mmsys_cg CLK_MMSYS_PWM_MM>,
-                <&mmsys_cg CLK_MMSYS_PWM_26M>;
-      levels = <0x3ff>; // 1024 levels
-    };
-
-    iommu: iommu@10203000 {
-      #iommu-cells = <1>;
-      reg = <0x10203000 0x1000>;
-      compatible = "mediatek,mt6580-m4u", "mediatek,m4u";
-      // mt6580 dont have cg for m4u
-      // clocks = <&sys26m>;
-      mediatek,larbs = <&larb0>;
-    };
-
-    larb0: larb@14016000 {
-      reg = <0x14016000 0x1000>;
-      compatible = "mediatek,mt6580-smi-larb", "mediatek,smi-larb";
-      clocks = <&mmsys_cg CLK_MMSYS_SMI_LARB0>;
-    };
-
-    mmsys: syscon@14000000 {
-      compatible = "mediatek,mt6580-mmsys";
-      reg = <0x14000000 0x1000>;
-      ports {
-        #address-cells = <1>;
-        #size-cells = <0>;
-
-        port@0 {
-          reg = <0>;
-          mmsys_display_0: endpoint {};
-        };
+      port@1 {
+        reg = <1>;
+        ovl0_out: endpoint {};
       };
     };
+  };
 
-    mutex: mutex@14015000 {
-      compatible = "mediatek,mt6580-disp-mutex";
-      reg = <0x14015000 0x1000>;
-      #mutex-cells = <2>;
-    };
+  rdma0: rdma@14009000 {
+    compatible = "mediatek,mt6580-disp-rdma";
+    reg = <0x14009000 0x1000>;
+    clocks = <&mmsys_cg CLK_MMSYS_RDMA0>;
+    iommus = <&iommu M4U_PORT_DISP_RDMA0>;
+    mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_RDMA0>;
 
-    ovl0: ovl@14007000 {
-      compatible = "mediatek,mt6580-disp-ovl";
-      reg = <0x14007000 0x1000>;
-      clocks = <&mmsys_cg CLK_MMSYS_OVL0>;
-      iommus = <&iommu M4U_PORT_DISP_OVL0>;
-      mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_OVL0>;
+    ports {
+      #address-cells = <1>;
+      #size-cells = <0>;
 
-      ports {
-        #address-cells = <1>;
-        #size-cells = <0>;
+      port@0 {
+        reg = <0>;
+        rdma0_in: endpoint {};
+      };
 
-        port@0 {
-          reg = <0>;
-          ovl0_in: endpoint {};
-        };
-
-        port@1 {
-          reg = <1>;
-          ovl0_out: endpoint {};
-        };
+      port@1 {
+        reg = <1>;
+        rdma0_out: endpoint {};
       };
     };
+  };
 
-    rdma0: rdma@14009000 {
-      compatible = "mediatek,mt6580-disp-rdma";
-      reg = <0x14009000 0x1000>;
-      clocks = <&mmsys_cg CLK_MMSYS_RDMA0>;
-      iommus = <&iommu M4U_PORT_DISP_RDMA0>;
-      mediatek,mutex = <&mutex 0 MTK_DISP_MUTEX_RDMA0>;
+  mipi_tx0: dsi-phy@14018000 {
+    compatible = "mediatek,mt6580-mipi-tx";
+    reg = <0x14018000 0x1000>;
+    #phy-cells = <0>;
+  };
 
-      ports {
-        #address-cells = <1>;
-        #size-cells = <0>;
+  dsi0: dsi@14012000 {
+    compatible = "mediatek,mt6580-dsi";
+    reg = <0x14012000 0x1000>;
+    clocks = <&mmsys_cg CLK_MMSYS_DSI_ENGINE>,
+              <&mmsys_cg CLK_MMSYS_DSI_DIGITAL>;
+    clock-names = "engine", "digital";
 
-        port@0 {
-          reg = <0>;
-          rdma0_in: endpoint {};
-        };
+    phys = <&mipi_tx0>;
+    phy-names = "dphy";
 
-        port@1 {
-          reg = <1>;
-          rdma0_out: endpoint {};
-        };
+    ports {
+      #address-cells = <1>;
+      #size-cells = <0>;
+
+      port@0 {
+        reg = <0>;
+        dsi0_in: endpoint {};
       };
-    };
 
-    mipi_tx0: dsi-phy@14018000 {
-      compatible = "mediatek,mt6580-mipi-tx";
-      reg = <0x14018000 0x1000>;
-      #phy-cells = <0>;
-    };
-
-    dsi0: dsi@14012000 {
-      compatible = "mediatek,mt6580-dsi";
-      reg = <0x14012000 0x1000>;
-      clocks = <&mmsys_cg CLK_MMSYS_DSI_ENGINE>,
-               <&mmsys_cg CLK_MMSYS_DSI_DIGITAL>;
-      clock-names = "engine", "digital";
-
-      phys = <&mipi_tx0>;
-      phy-names = "dphy";
-
-      ports {
-        #address-cells = <1>;
-        #size-cells = <0>;
-
-        port@0 {
-          reg = <0>;
-          dsi0_in: endpoint {};
-        };
-
-        port@1 {
-          reg = <1>;
-          dsi0_out: endpoint {};
-        };
+      port@1 {
+        reg = <1>;
+        dsi0_out: endpoint {};
       };
     };
   };
