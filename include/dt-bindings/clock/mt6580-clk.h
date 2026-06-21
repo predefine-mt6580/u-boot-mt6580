@@ -30,8 +30,8 @@
 #define CLK_TOP_UART0_SEL 12
 #define CLK_TOP_MSDC0_SEL 13
 #define CLK_TOP_UART1_SEL 14
-#define CLK_TOP_MSDC1_SEL 16
-#define CLK_TOP_MMSYS_PWM_SEL 17
+#define CLK_TOP_MSDC1_SEL 15
+#define CLK_TOP_MMSYS_PWM_SEL 16
 
 /* Gates */
 #define CLK_TOP_MMSYS_PWM 0
